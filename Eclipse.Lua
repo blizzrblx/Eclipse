@@ -236,7 +236,7 @@ end
 
 
 function SetSpeed(dt)
-    if not SpeedBoostEnabled or SpeedBoost then return end
+    if not SpeedBoostEnabled then return end
 
     local char = Player.Character
     if not char then return end
@@ -378,3 +378,4 @@ SaveManager:SetFolder("EclipseHub/jailbreak")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
+
