@@ -5,6 +5,7 @@ AimbotModule.Enabled = false
 AimbotModule.Active = false
 AimbotModule.MaxTrackingDistance = 500
 AimbotModule.CurrentSortFn = nil
+AimbotModule.Smoothness = 0
 
 getgenv().BlizzAimbotActive = false
 
@@ -97,7 +98,7 @@ function LookAtTarget()
 
     if onScreen then
         if AimbotModule.Enabled and AimbotModule.Active then
-            mousemoverel(predictionX,predictionY)
+            mousemoverel(predictionX:Lerp(AimbotModule.Smoothness),predictionY:Lerp(AimbotModule.Smoothness)
         end
     end
 end
@@ -114,6 +115,10 @@ function AimbotModule:SetSort(fn)
     else
         error("No Function given")
     end
+end
+
+function AimbotModule:SetSmooth(Amount)
+    AimbotModule.Smoothness = Amount
 end
 
 UIS.InputBegan:Connect(function(Input,GameProcessed)
