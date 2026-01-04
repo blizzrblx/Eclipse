@@ -1,2 +1,380 @@
-local v0=game:GetService("Players");local v1=game:GetService("RunService");local v2=game:GetService("UserInputService");local v3=workspace.CurrentCamera;local v4=v0.LocalPlayer;local v5=loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))();local v6=loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))();local v7=loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))();local v8=v5.Options;local v9=false;local v10=false;local v11=false;local v12=false;local v13=false;local v14=false;local v15=false;local v16=false;local v17=Color3.fromRGB(45 + 210 ,0 -0 ,0 + 0 );local v18=false;local v19=791 -(368 + 423) ;local v20=false;local v21=0 -0 ;local v22=false;local v23={};local v24={};local v25={Jewlery=CFrame.new(103.321259,36.1656418 -(10 + 8) ,4962.99756 -3672 ),PowerPlant=CFrame.new(592.725403 -(416 + 26) ,21.6912136,7334.86743 -5037 )};local function v26(v38) local v39=0 + 0 ;local v40;while true do if (v39==(1 -0)) then return v40;end if (v39==(438 -(145 + 293))) then v40={};for v121,v122 in ipairs(v0:GetPlayers()) do if (v122.Character and v122.Character:FindFirstChild("HumanoidRootPart")) then if ( not v38 or (v122~=v4)) then table.insert(v40,v122.Character);end end end v39=431 -(44 + 386) ;end end end function GetPlayers(v41) local v42=1486 -(998 + 488) ;local v43;while true do if (v42==(1 + 0)) then return v43;end if (v42==(0 + 0)) then v43={};for v123,v124 in ipairs(v0:GetPlayers()) do if ( not v41 or (v124~=v4)) then table.insert(v43,v124);end end v42=1;end end end local function v27() for v82,v83 in ipairs(v26(true)) do local v84=772 -(201 + 571) ;local v85;local v86;while true do if (v84==(1139 -(116 + 1022))) then v86=v83:FindFirstChild("Eclipse_ESP");if v9 then if  not v86 then local v151=0 -0 ;while true do if (v151==(1 + 0)) then v86.Parent=v83;v86.FillTransparency=0.5 -0 ;v151=2;end if (v151==(7 -5)) then v86.OutlineTransparency=0;break;end if (v151==0) then v86=Instance.new("Highlight");v86.Name="Eclipse_ESP";v151=860 -(814 + 45) ;end end end if (v10 and v85.Team) then if (v85.Team.Name=="Police") then v86.FillColor=Color3.fromRGB(33,33,255);elseif (v85.Team.Name=="Prisoner") then v86.FillColor=Color3.fromRGB(628 -373 ,129,5 + 82 );else v86.FillColor=Color3.fromRGB(80 + 146 ,886 -(261 + 624) ,1 -0 );end else v86.FillColor=v17;end elseif v86 then v86:Destroy();end break;end if (v84==(1080 -(1020 + 60))) then v85=v0:GetPlayerFromCharacter(v83);if  not v85 then continue;end v84=1;end end end end local function v28(v44) local v45=v23[v44];if v45 then local v109=1423 -(630 + 793) ;while true do if (v109==(0 -0)) then v45:Remove();v23[v44]=nil;break;end end end end local function v29(v46) local v47=0;local v48;while true do if (v47==(0 -0)) then v48=v24[v46];if v48 then local v133=0 + 0 ;while true do if (v133==(0 -0)) then v48:Remove();v24[v46]=nil;break;end end end break;end end end local function v30() local v49={};for v87,v88 in ipairs(v0:GetPlayers()) do local v89=1747 -(760 + 987) ;local v90;local v91;local v92;local v93;local v94;while true do if (v89==(1913 -(1789 + 124))) then v49[v88]=true;v90=v88.Character;if ( not v11 or  not v90) then local v135=0;while true do if (v135==(766 -(745 + 21))) then v28(v88);continue;break;end end end v91=v90:GetPivot().Position + Vector3.new(0 + 0 ,7 -4 ,0 -0 ) ;v89=1 + 0 ;end if (v89==(2 + 0)) then v94.Text=v88.Name;v94.Position=Vector2.new(v92.X,v92.Y);v94.Visible=true;if v12 then if (v88.Team and (v88.Team.Name=="Police")) then v94.Color=Color3.fromRGB(1088 -(87 + 968) ,145 -112 ,232 + 23 );elseif (v88.Team and (v88.Team.Name=="Prisoner")) then v94.Color=Color3.fromRGB(255,129,196 -109 );else v94.Color=Color3.fromRGB(1639 -(447 + 966) ,1,1);end else v94.Color=v17;end break;end if (v89==(2 -1)) then v92,v93=v3:WorldToViewportPoint(v91);if  not v93 then local v137=0;while true do if (v137==0) then v28(v88);continue;break;end end end if  not v23[v88] then local v138=Drawing.new("Text");v138.Center=true;v138.Outline=true;v138.Size=1833 -(1703 + 114) ;v23[v88]=v138;end v94=v23[v88];v89=703 -(376 + 325) ;end end end for v95 in pairs(v23) do if  not v49[v95] then v28(v95);end end end function UpdateLineESP() local v50={};for v96,v97 in ipairs(GetPlayers(true)) do v50[v97]=true;local v99=v97.Character;local v100=v99 and v99:FindFirstChild("HumanoidRootPart") ;if ( not v13 or  not v100) then local v111=0;while true do if (v111==(0 -0)) then v29(v97);continue;break;end end end local v101,v102=v3:WorldToViewportPoint(v100.Position);if  not v102 then local v112=0 -0 ;while true do if (v112==0) then v29(v97);continue;break;end end end local v103=v2:GetMouseLocation();local v104=Vector2.new(v103.X,v103.Y);if v16 then v104=Vector2.new(v3.ViewportSize/2 ,v3.ViewportSize/2 );end if  not v24[v97] then local v113=0;local v114;while true do if (v113==(1 + 2)) then v24[v97]=v114;break;end if ((2 -1)==v113) then v114.Thickness=16 -(9 + 5) ;v114.Color=v17;v113=378 -(85 + 291) ;end if (v113==(1265 -(243 + 1022))) then v114=Drawing.new("Line");v114.Transparency=1;v113=3 -2 ;end if (v113==(2 + 0)) then v114.Visible=true;v114.From=v104;v113=3;end end end local v105=v24[v97];if v14 then v105.From=v105.From:Lerp(v104,1180.25 -(1123 + 57) );else v105.From=v104;end v105.To=Vector2.new(v101.X,v101.Y);v105.Visible=true;if v15 then if (v97.Team and (v97.Team.Name=="Police")) then v105.Color=Color3.fromRGB(33,27 + 6 ,255);elseif (v97.Team and (v97.Team.Name=="Prisoner")) then v105.Color=Color3.fromRGB(255,129,341 -(163 + 91) );else v105.Color=Color3.fromRGB(2156 -(1869 + 61) ,1 + 0 ,1);end else v105.Color=v17;end end for v108 in pairs(v24) do if  not v50[v108] then v29(v108);end end end function SetJump() local v51=0;local v52;local v53;local v54;while true do if ((0 -0)==v51) then if (v18==false) then return;end v52=v4.Character.HumanoidRootPart;v51=1 -0 ;end if (2==v51) then v52.Velocity=v54;break;end if (v51==1) then v53=v4.Character.Humanoid;v54=Vector3.new(v52.Velocity.X,v19,v52.Velocity.Z);v51=2;end end end function SetSpeed(v55) if ( not v20 or v21) then return;end local v56=v4.Character;if  not v56 then return;end local v57=v56:FindFirstChildOfClass("Humanoid");local v58=v56:FindFirstChild("HumanoidRootPart");if ( not v57 or  not v58) then return;end if (v57.FloorMaterial==Enum.Material.Air) then return;end local v59=v57.MoveDirection;if (v59.Magnitude==(0 + 0)) then return;end local v60=v57.WalkSpeed + v21 ;local v61=Vector3.new(v58.Velocity.X,0 -0 ,v58.Velocity.Z);local v62=v59 * v60 ;local v63=12;local v64=v61:Lerp(v62,math.clamp(v63 * v55 ,0 + 0 ,1475 -(1329 + 145) ));v58.Velocity=Vector3.new(v64.X,v58.Velocity.Y,v64.Z);end v2.JumpRequest:Connect(function() if ((v4.Character.Humanoid.Jump==false) and (v22==false)) then SetJump();elseif (v22==true) then SetJump();end end);v2.JumpRequest:Connect(function() if (v22==true) then v4.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping);end end);local v31=v5:CreateWindow({Title="Eclipse | Jailbreak",SubTitle="by blizz",TabWidth=1131 -(140 + 831) ,Size=UDim2.fromOffset(650,2500 -(1409 + 441) ),Resize=true,MinSize=Vector2.new(1098 -(15 + 703) ,176 + 204 ),Theme="Dark",MinimizeKey=Enum.KeyCode.RightControl});local v32={Main=v31:CreateTab({Title="Player",Icon="user-round-pen"}),ESP=v31:CreateTab({Title="Visuals",Icon="eye"}),Settings=v31:CreateTab({Title="Settings",Icon="settings"})};local v33=v32.Main:AddSection("Jump");v33:CreateToggle("JumpBoostToggle",{Title="Toggle Jump Boost",Default=false}):OnChanged(function() v18=v8.JumpBoostToggle.Value;end);v33:CreateInput("JumpBoostInput",{Title="Jump Boost Amount",Default="0",Placeholder="0",Numeric=true,Finished=false,Callback=function(v67) v19=tonumber(v67);end});v33:CreateToggle("InfJumpToggle",{Title="Toggle Infinite Jump",Default=false}):OnChanged(function() v22=v8.InfJumpToggle.Value;end);local v34=v32.Main:AddSection("Speed");v34:CreateToggle("SpeedBoostToggle",{Title="Toggle Speed Boost",Default=false}):OnChanged(function() v20=v8.SpeedBoostToggle.Value;end);v34:CreateInput("SpeedBoostInput",{Title="Speed Boost Amount",Default="0",Placeholder="0",Numeric=true,Finished=false,Callback=function(v70) v21=tonumber(v70);end});local v35=v32.ESP:AddSection("Highlight ESP");v35:CreateToggle("ESPToggle",{Title="Toggle ESP",Default=false}):OnChanged(function() v9=v8.ESPToggle.Value;end);v35:CreateColorpicker("ESPColorpicker",{Title="ESP Color",Default=v17}):OnChanged(function() v17=v8.ESPColorpicker.Value;end);v35:CreateToggle("ESPTeamToggle",{Title="Team Colors",Default=false}):OnChanged(function() v10=v8.ESPTeamToggle.Value;end);local v36=v32.ESP:AddSection("Nametag ESP");v36:CreateToggle("ESPNameToggle",{Title="Name Tags",Default=false}):OnChanged(function() v11=v8.ESPNameToggle.Value;end);v36:CreateToggle("ESPNameTeamToggle",{Title="Name Tag Team Color",Default=false}):OnChanged(function() v12=v8.ESPNameTeamToggle.Value;end);local v37=v32.ESP:AddSection("Tracer ESP");v37:CreateToggle("ESPLineToggle",{Title="ESP Tracers",Default=false}):OnChanged(function() v13=v8.ESPLineToggle.Value;end);v37:CreateToggle("ESPLineSmoothOrginToggle",{Title="ESP Tracer Smoothing",Default=false}):OnChanged(function() v14=v8.ESPLineSmoothOrginToggle.Value;end);v37:CreateToggle("ESPLineCenteredToggle",{Title="ESP Tracer Smoothing",Default=false}):OnChanged(function() v16=v8.ESPLineCenteredToggle.Value;end);v37:CreateToggle("ESPLineTeamToggle",{Title="ESP Tracer Team Color",Default=false}):OnChanged(function() v15=v8.ESPLineTeamToggle.Value;end);v1.RenderStepped:Connect(function(v80) local v81=438 -(262 + 176) ;while true do if (v81==(1721 -(345 + 1376))) then v27();v30();v81=689 -(198 + 490) ;end if (v81==(4 -3)) then UpdateLineESP();SetSpeed(v80);break;end end end);v6:SetLibrary(v5);v7:SetLibrary(v5);v7:SetFolder("EclipseHub");v6:SetFolder("EclipseHub/jailbreak");v7:BuildInterfaceSection(v32.Settings);v6:BuildConfigSection(v32.Settings); end
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+local Player = Players.LocalPlayer
 
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Options = Library.Options
+
+local ESPEnabled = false
+local TeamESPEnabled = false
+local ESPNameEnabled = false
+local ESPNameTeamColor = false
+local ESPLineEnabled = false
+local ESPLineSmoothOrgin = false
+local ESPLineTeamColor = false
+local ESPLineCentered = false
+local ESPColor = Color3.fromRGB(255, 0, 0)
+
+local JumpBoostEnabled = false
+local JumpHeightBoost = 0
+
+local SpeedBoostEnabled = false
+local SpeedBoost = 0
+
+local InfJumpEnabled = false
+
+local ESPNameInstances = {}
+local ESPLineInstances = {}
+
+local function GetCharacters(filterSelf)
+    local chars = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            if not filterSelf or plr ~= Player then
+                table.insert(chars, plr.Character)
+            end
+        end
+    end
+    return chars
+end
+
+function GetPlayers(filterSelf)
+    local plrs = {}
+    for _,plr in ipairs(Players:GetPlayers()) do
+        if not filterSelf or plr ~= Player then
+            table.insert(plrs,plr)
+        end
+    end
+
+    return plrs
+end
+
+local function UpdateESP()
+    for _, char in ipairs(GetCharacters(true)) do
+        local plr = Players:GetPlayerFromCharacter(char)
+        if not plr then continue end
+
+        local esp = char:FindFirstChild("Eclipse_ESP")
+
+        if ESPEnabled then
+            if not esp then
+                esp = Instance.new("Highlight")
+                esp.Name = "Eclipse_ESP"
+                esp.Parent = char
+                esp.FillTransparency = 0.5
+                esp.OutlineTransparency = 0
+            end
+
+            if TeamESPEnabled and plr.Team then
+                if plr.Team.Name == "Police" then
+                    esp.FillColor = Color3.fromRGB(33, 33, 255)
+                elseif plr.Team.Name == "Prisoner" then
+                    esp.FillColor = Color3.fromRGB(255, 129, 87)
+                else
+                    esp.FillColor = Color3.fromRGB(226, 1, 1)
+                end
+            else
+                esp.FillColor = ESPColor
+            end
+        else
+            if esp then esp:Destroy() end
+        end
+    end
+end
+
+local function removeESP(plr)
+    local txt = ESPNameInstances[plr]
+    if txt then
+        txt:Remove()
+        ESPNameInstances[plr] = nil
+    end
+end
+
+local function removeLine(plr)
+    local line = ESPLineInstances[plr]
+    if line then
+        line:Remove()
+        ESPLineInstances[plr] = nil
+    end
+end
+
+local function UpdateNameESP()
+    local alive = {}
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        alive[plr] = true
+
+        local char = plr.Character
+        if not ESPNameEnabled or not char then
+            removeESP(plr)
+            continue
+        end
+
+        local pos = char:GetPivot().Position + Vector3.new(0, 3, 0)
+        local screenPos, onScreen = Camera:WorldToViewportPoint(pos)
+
+        if not onScreen then
+            removeESP(plr)
+            continue
+        end
+
+        if not ESPNameInstances[plr] then
+            local txt = Drawing.new("Text")
+            txt.Center = true
+            txt.Outline = true
+            txt.Size = 16
+            ESPNameInstances[plr] = txt
+        end
+
+        local txt = ESPNameInstances[plr]
+        txt.Text = plr.Name
+        txt.Position = Vector2.new(screenPos.X, screenPos.Y)
+        txt.Visible = true
+
+        if ESPNameTeamColor then
+            if plr.Team and plr.Team.Name == "Police" then
+                txt.Color = Color3.fromRGB(33, 33, 255)
+            elseif plr.Team and plr.Team.Name == "Prisoner" then
+                txt.Color = Color3.fromRGB(255, 129, 87)
+            else
+                txt.Color = Color3.fromRGB(226, 1, 1)
+            end
+        else
+            txt.Color = ESPColor
+        end
+    end
+    for plr in pairs(ESPNameInstances) do
+        if not alive[plr] then
+            removeESP(plr)
+        end
+    end
+end
+
+function UpdateLineESP()
+    local alive = {}
+
+    for _, plr in ipairs(GetPlayers(true)) do
+        alive[plr] = true
+
+        local char = plr.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+
+        if not ESPLineEnabled or not root then
+            removeLine(plr)
+            continue
+        end
+
+        local screenPos, onScreen =
+            Camera:WorldToViewportPoint(root.Position)
+
+        if not onScreen then
+            removeLine(plr)
+            continue
+        end
+
+        local mousePos = UIS:GetMouseLocation()
+        local origin = Vector2.new(mousePos.X, mousePos.Y)
+
+        if ESPLineCentered then
+            origin = Vector2.new((Camera.ViewportSize / 2), (Camera.ViewportSize / 2))
+        end
+
+        if not ESPLineInstances[plr] then
+            local line = Drawing.new("Line")
+            line.Transparency = 1
+            line.Thickness = 2
+            line.Color = ESPColor
+            line.Visible = true
+            line.From = origin
+            ESPLineInstances[plr] = line
+        end
+
+        local line = ESPLineInstances[plr]
+        
+        if ESPLineSmoothOrgin then
+            line.From = line.From:Lerp(origin,0.25)
+        else
+            line.From = origin
+        end
+        line.To = Vector2.new(screenPos.X, screenPos.Y)
+        line.Visible = true
+
+        if ESPLineTeamColor then
+            if plr.Team and plr.Team.Name == "Police" then
+                line.Color = Color3.fromRGB(33, 33, 255)
+            elseif plr.Team and plr.Team.Name == "Prisoner" then
+                line.Color = Color3.fromRGB(255, 129, 87)
+            else
+                line.Color = Color3.fromRGB(226, 1, 1)
+            end
+        else
+            line.Color = ESPColor
+        end
+    end
+
+    for plr in pairs(ESPLineInstances) do
+        if not alive[plr] then
+            removeLine(plr)
+        end
+    end
+end
+
+function SetJump()
+    if JumpBoostEnabled == false then return end
+
+    local hrp = Player.Character.HumanoidRootPart
+    local hum = Player.Character.Humanoid
+
+    local vec = Vector3.new(hrp.Velocity.X,JumpHeightBoost,hrp.Velocity.Z)
+    hrp.Velocity = vec
+end
+
+
+function SetSpeed(dt)
+    if not SpeedBoostEnabled or SpeedBoost then return end
+
+    local char = Player.Character
+    if not char then return end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return end
+
+    if hum.FloorMaterial == Enum.Material.Air then
+        return
+    end
+
+    local moveDir = hum.MoveDirection
+    if moveDir.Magnitude == 0 then
+        return
+    end
+
+    local targetSpeed = hum.WalkSpeed + SpeedBoost
+
+    local horizontalVel = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+
+    local desiredVel = moveDir * targetSpeed
+
+    local accel = 12
+    local newVel = horizontalVel:Lerp(desiredVel, math.clamp(accel * dt, 0, 1))
+
+    hrp.Velocity = Vector3.new(
+        newVel.X,
+        hrp.Velocity.Y,
+        newVel.Z
+    )
+end
+
+UIS.JumpRequest:Connect(function()
+    if Player.Character.Humanoid.Jump == false and InfJumpEnabled == false then
+        SetJump()
+    elseif InfJumpEnabled == true then
+        SetJump()
+    end
+end)
+
+UIS.JumpRequest:Connect(function()
+    if InfJumpEnabled == true then Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
+end)
+
+local Window = Library:CreateWindow({
+    Title = "Eclipse | Jailbreak",
+    SubTitle = "by blizz",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(650, 650),
+    Resize = true,
+    MinSize = Vector2.new(380, 380),
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+})
+
+local Tabs = {
+    Main = Window:CreateTab({Title = "Player",Icon = "user-round-pen"}),
+    ESP = Window:CreateTab({ Title = "Visuals", Icon = "eye" }),
+    Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" }),
+}
+
+local JumpSection = Tabs.Main:AddSection("Jump")
+
+JumpSection:CreateToggle("JumpBoostToggle", { Title = "Toggle Jump Boost", Default = false})
+    :OnChanged(function() JumpBoostEnabled = Options.JumpBoostToggle.Value end)
+
+JumpSection:CreateInput("JumpBoostInput", {
+    Title = "Jump Boost Amount", Default = "0", Placeholder = "0", Numeric = true, Finished = false,
+    Callback = function(Value)
+        JumpHeightBoost = tonumber(Value)
+    end
+})
+
+JumpSection:CreateToggle("InfJumpToggle", { Title = "Toggle Infinite Jump", Default = false})
+    :OnChanged(function() InfJumpEnabled = Options.InfJumpToggle.Value end)
+
+local SpeedSection = Tabs.Main:AddSection("Speed")
+
+SpeedSection:CreateToggle("SpeedBoostToggle", { Title = "Toggle Speed Boost", Default = false})
+    :OnChanged(function() SpeedBoostEnabled = Options.SpeedBoostToggle.Value end)
+
+SpeedSection:CreateInput("SpeedBoostInput", {
+    Title = "Speed Boost Amount", Default = "0", Placeholder = "0", Numeric = true, Finished = false,
+    Callback = function(Value)
+        SpeedBoost = tonumber(Value)
+    end
+})
+
+local HighlightSection = Tabs.ESP:AddSection("Highlight ESP")
+
+HighlightSection:CreateToggle("ESPToggle", { Title = "Toggle ESP", Default = false })
+    :OnChanged(function() ESPEnabled = Options.ESPToggle.Value end)
+
+HighlightSection:CreateColorpicker("ESPColorpicker", {
+    Title = "ESP Color",
+    Default = ESPColor
+}):OnChanged(function()
+    ESPColor = Options.ESPColorpicker.Value
+end)
+
+HighlightSection:CreateToggle("ESPTeamToggle", { Title = "Team Colors", Default = false })
+    :OnChanged(function() TeamESPEnabled = Options.ESPTeamToggle.Value end)
+
+local NameSection = Tabs.ESP:AddSection("Nametag ESP")
+
+NameSection:CreateToggle("ESPNameToggle", { Title = "Name Tags", Default = false })
+    :OnChanged(function() ESPNameEnabled = Options.ESPNameToggle.Value end)
+
+NameSection:CreateToggle("ESPNameTeamToggle", { Title = "Name Tag Team Color", Default = false })
+    :OnChanged(function() ESPNameTeamColor = Options.ESPNameTeamToggle.Value end)
+
+local LineSection = Tabs.ESP:AddSection("Tracer ESP")
+
+LineSection:CreateToggle("ESPLineToggle", { Title = "ESP Tracers", Default = false })
+    :OnChanged(function() ESPLineEnabled = Options.ESPLineToggle.Value end)
+
+LineSection:CreateToggle("ESPLineSmoothOrginToggle", { Title = "ESP Tracer Smoothing", Default = false })
+    :OnChanged(function() ESPLineSmoothOrgin = Options.ESPLineSmoothOrginToggle.Value end)
+
+LineSection:CreateToggle("ESPLineCenteredToggle", { Title = "ESP Tracer Smoothing", Default = false })
+    :OnChanged(function() ESPLineCentered = Options.ESPLineCenteredToggle.Value end)
+
+LineSection:CreateToggle("ESPLineTeamToggle", { Title = "ESP Tracer Team Color", Default = false })
+    :OnChanged(function() ESPLineTeamColor = Options.ESPLineTeamToggle.Value end)
+
+RunService.RenderStepped:Connect(function(dt)
+    UpdateESP()
+    UpdateNameESP()
+    UpdateLineESP()
+    SetSpeed(dt)
+end)
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+InterfaceManager:SetFolder("EclipseHub")
+SaveManager:SetFolder("EclipseHub/jailbreak")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
