@@ -181,7 +181,9 @@ function UpdateLineESP()
         local origin = Vector2.new(mousePos.X, mousePos.Y)
 
         if ESPLineCentered then
-            origin = Vector2.new((Camera.ViewportSize / 2), (Camera.ViewportSize / 2))
+            origin = Vector2.new((Camera.ViewportSize.X / 2), (Camera.ViewportSize.Y / 2))
+        else
+            origin = Vector2.new(mousePos.X, mousePos.Y)
         end
 
         if not ESPLineInstances[plr] then
@@ -260,7 +262,7 @@ function SetSpeed(dt)
 
     local desiredVel = moveDir * targetSpeed
 
-    local accel = 12
+    local accel = 8
     local newVel = horizontalVel:Lerp(desiredVel, math.clamp(accel * dt, 0, 1))
 
     hrp.Velocity = Vector3.new(
@@ -357,7 +359,7 @@ LineSection:CreateToggle("ESPLineToggle", { Title = "ESP Tracers", Default = fal
 LineSection:CreateToggle("ESPLineSmoothOrginToggle", { Title = "ESP Tracer Smoothing", Default = false })
     :OnChanged(function() ESPLineSmoothOrgin = Options.ESPLineSmoothOrginToggle.Value end)
 
-LineSection:CreateToggle("ESPLineCenteredToggle", { Title = "ESP Tracer Smoothing", Default = false })
+LineSection:CreateToggle("ESPLineCenteredToggle", { Title = "ESP Tracer Centered", Default = false })
     :OnChanged(function() ESPLineCentered = Options.ESPLineCenteredToggle.Value end)
 
 LineSection:CreateToggle("ESPLineTeamToggle", { Title = "ESP Tracer Team Color", Default = false })
@@ -378,4 +380,3 @@ SaveManager:SetFolder("EclipseHub/jailbreak")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
-
