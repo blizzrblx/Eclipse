@@ -7,7 +7,9 @@ AimbotModule.MaxTrackingDistance = 500
 AimbotModule.CurrentSortFn = nil
 AimbotModule.Smoothness = 0
 
-getgenv().BlizzAimbotActive = false
+if not getgenv().BlizzAimbotActive then
+    getgenv().BlizzAimbotActive = false
+end
 
 if getgenv().BlizzAimbotActive == true then return end
 
@@ -89,6 +91,12 @@ function LookAtTarget()
 
     local screenPos,onScreen = Camera:WorldToViewportPoint(AimbotModule.CurrentTarget.Position)
 
+    local Highlight = workspace:FindFirstChild("BlizzAimbot_Highlight")
+    if Highlight then
+        Highlight.Adornee = AimbotModule.CurrentCharacter
+        Highlight.Enabled = true
+    end
+
     local targetX,targetY = screenPos.X,screenPos.Y
 
     local deltaX = targetX - UIS:GetMouseLocation().X
@@ -98,7 +106,7 @@ function LookAtTarget()
 
     if onScreen then
         if AimbotModule.Enabled and AimbotModule.Active then
-            mousemoverel(predictionX:Lerp(AimbotModule.Smoothness),predictionY:Lerp(AimbotModule.Smoothness)
+            mousemoverel(predictionX:Lerp(AimbotModule.Smoothness),predictionY:Lerp(AimbotModule.Smoothness))
         end
     end
 end
@@ -106,7 +114,10 @@ end
 AimbotModule.Init = function()
     getgenv().BlizzAimbotActive = true
     AimbotModule.Enabled = true
-    print("Running")
+    
+    local TargetHighlight = Instance.new("Highlight",workspace)
+    TargetHighlight.Name = "BlizzAimbot_Target"
+    TargetHighlight.Enabled = false
 end
 
 function AimbotModule:SetSort(fn)
