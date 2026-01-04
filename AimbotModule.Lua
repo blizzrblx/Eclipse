@@ -92,7 +92,7 @@ function LookAtTarget()
     local targetPart = AimbotModule.CurrentTarget
 
     -- prediction time (seconds)
-    local predictionTime = 0.03
+    local predictionTime = 0.05
 
     local velocity = targetPart.AssemblyLinearVelocity
     local predictedPosition =
@@ -118,7 +118,7 @@ end
 
 AimbotModule.Init = function()
     getgenv().BlizzAimbotActive = true
-    AimbotModule.Enabled = true
+    AimbotModule.Enabled = false
     
     local TargetHighlight = Instance.new("Highlight",workspace)
     TargetHighlight.Name = "BlizzAimbot_Target"
@@ -135,6 +135,10 @@ end
 
 function AimbotModule:SetSmooth(Amount)
     AimbotModule.Smoothness = Amount
+end
+
+function AimbotModule:Toggle(Enabled)
+    AimbotModule.Enabled = Enabled
 end
 
 UIS.InputBegan:Connect(function(Input,GameProcessed)
