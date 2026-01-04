@@ -86,29 +86,34 @@ function SetClosest()
 end
 
 function LookAtTarget()
-    if AimbotModule.CurrentTarget == nil then return end
-    if AimbotModule.CurrentCharacter == nil then return end
+    if not (AimbotModule.Enabled and AimbotModule.Active) then return end
+    if not AimbotModule.CurrentTarget then return end
 
-    local screenPos,onScreen = Camera:WorldToViewportPoint(AimbotModule.CurrentTarget.Position)
+    local targetPart = AimbotModule.CurrentTarget
 
-    local Highlight = workspace:FindFirstChild("BlizzAimbot_Highlight")
-    if Highlight then
-        Highlight.Adornee = AimbotModule.CurrentCharacter
-        Highlight.Enabled = true
-    end
+    -- prediction time (seconds)
+    local predictionTime = 0.03
 
-    local targetX,targetY = screenPos.X,screenPos.Y
+    local velocity = targetPart.AssemblyLinearVelocity
+    local predictedPosition =
+        targetPart.Position + (velocity * predictionTime)
 
-    local deltaX = targetX - UIS:GetMouseLocation().X
-    local deltaY = targetY - UIS:GetMouseLocation().Y
+    local screenPos, onScreen =
+        Camera:WorldToViewportPoint(predictedPosition)
 
-    local predictionX,predictionY = (deltaX + AimbotModule.CurrentTarget.Velocity.Z), (deltaY + AimbotModule.CurrentTarget.Velocity.Y)
+    if not onScreen then return end
 
-    if onScreen then
-        if AimbotModule.Enabled and AimbotModule.Active then
-            mousemoverel(predictionX:Lerp(AimbotModule.Smoothness),predictionY:Lerp(AimbotModule.Smoothness))
-        end
-    end
+    local mousePos = UIS:GetMouseLocation()
+
+    local deltaX = screenPos.X - mousePos.X
+    local deltaY = screenPos.Y - mousePos.Y
+
+    local smooth = math.max(AimbotModule.Smoothness, 1)
+
+    deltaX /= smooth
+    deltaY /= smooth
+
+    mousemoverel(deltaX, deltaY)
 end
 
 AimbotModule.Init = function()
