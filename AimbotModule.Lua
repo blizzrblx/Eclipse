@@ -156,7 +156,7 @@ function SetESPTag()
 
             local Char = plr.Character
 
-            if not AimbotModule.NametagEnabled or Char then
+            if not AimbotModule.NametagEnabled or not Char then
                 RemoveNametag(plr)
                 continue
             end
@@ -180,6 +180,7 @@ function SetESPTag()
             nametag.Text = plr.DisplayName
             nametag.Position = Vector2.new(ScreenVec.X,ScreenVec.Y)
             nametag.Color = Color3.fromRGB(205,0,0)
+			nametag.Visible = true
 
             if AimbotModule.RGBEnabled then
                 nametag.Color = AimbotModule.RGBColor
@@ -263,6 +264,7 @@ RunService.RenderStepped:Connect(function()
     SetClosest()
     LookAtTarget()
     TriggerbotCheck()
+	SetESPTag()
 
     local t = 5;
 
