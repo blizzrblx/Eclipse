@@ -17,12 +17,6 @@ AimbotModule.RGBColor = nil
 local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
 
-if not getgenv().BlizzAimbotActive then
-    getgenv().BlizzAimbotActive = false
-end
-
-if getgenv().BlizzAimbotActive == true then return end
-
 function GetService(ServiceName)
     assert(type(ServiceName) == "string","BlizzAimbotV1: Incorrect type")
     return cloneref(game:GetService(ServiceName))
@@ -196,7 +190,6 @@ end
 
 
 AimbotModule.Init = function()
-    getgenv().BlizzAimbotActive = true
     AimbotModule.Enabled = false
     
     local TargetHighlight = Instance.new("Highlight",workspace)
