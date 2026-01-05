@@ -1,4 +1,5 @@
 local AimbotModule = {}
+AimbotModule.CurrentKeybind = Enum.UserInputType.MouseButton2
 AimbotModule.CurrentTarget = nil
 AimbotModule.CurrentCharacter = nil
 AimbotModule.Enabled = false
@@ -233,28 +234,32 @@ function AimbotModule:Toggle(Enabled)
     AimbotModule.Enabled = Enabled
 end
 
-function AimbotModule:Triggerbot(Enabled)
+function AimbotModule:ToggleTriggerbot(Enabled)
     AimbotModule.TBEnabled = Enabled
 end
 
-function AimbotModule:Nametag(Enabled)
+function AimbotModule:ToggleNametag(Enabled)
     AimbotModule.NametagEnabled = Enabled
 end
 
-function AimbotModule:RGB(Enabled)
+function AimbotModule:ToggleRGB(Enabled)
     AimbotModule.RGBEnabled = Enabled
+end
+
+function AimbotModule:SetKeybind(Key)
+    AimbotModule.CurrentKeybind = Key
 end
 
 UIS.InputBegan:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
-    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+    if Input.UserInputType == AimbotModule.CurrentKeybind or Input.KeyCode == AimbotModule.CurrentKeybind then
         AimbotModule.Active = true
     end
 end)
 
 UIS.InputEnded:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
-    if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+    if Input.UserInputType == AimbotModule.CurrentKeybind or Input.KeyCode == AimbotModule.CurrentKeybind then
         AimbotModule.Active = false
     end
 end)
