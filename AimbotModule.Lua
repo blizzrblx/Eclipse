@@ -205,7 +205,7 @@ function AimbotModule:SetSort(fn)
                 AimbotModule.CurrentSortFn = function(Local,Other)
                     return Other.Team.Name ~= Local.Team.Name
                 end
-            elseif fn = "Jailbreak" or "JB" then
+            elseif fn == "Jailbreak" or "JB" then
                 AimbotModule.CurrentSortFn = function(Local,Other)
                     return Other.Team.Name ~= Local.Team.Name
                 end
