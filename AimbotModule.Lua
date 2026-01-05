@@ -136,7 +136,7 @@ function AimbotModule:SetSort(fn)
                 AimbotModule.CurrentSortFn = function(Local,Other)
                     return Other.Team.Name ~= Local.Team.Name
                 end
-            elseif fn = "Jailbreak" or "JB" then
+            elseif fn == "Jailbreak" or "JB" then
                 AimbotModule.CurrentSortFn = function(Local,Other)
                     return Other.Team.Name ~= Local.Team.Name
                 end
@@ -183,5 +183,9 @@ RunService.RenderStepped:Connect(function()
     SetClosest()
     LookAtTarget()
 end)
+
+AimbotModule.Init()
+AimbotModule:SetSmooth(2)
+AimbotModule:SetSort("Arsenal")
 
 return AimbotModule
