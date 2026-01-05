@@ -7,6 +7,15 @@ AimbotModule.MaxTrackingDistance = 500
 AimbotModule.CurrentSortFn = nil
 AimbotModule.Smoothness = 0
 AimbotModule.Prediction = 0.05
+AimbotModule.TBEnabled = false
+AimbotModule.TBTarget = "Head"
+AimbotModule.NametagEnabled = false
+AimbotModule.NametagInstances = {}
+AimbotModule.RGBEnabled = false
+AimbotModule.RGBColor = nil
+
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
 
 if not getgenv().BlizzAimbotActive then
     getgenv().BlizzAimbotActive = false
@@ -120,6 +129,65 @@ function LookAtTarget()
     mousemoverel(deltaX, deltaY)
 end
 
+function TriggerbotCheck()
+    if not AimbotModule.TBEnabled then return end
+
+    local Target = Mouse.Target
+
+    if Target then
+        if Target.Name == AimbotModule.TBTarget and Players:GetPlayerFromCharacter(Target.Parent) then mouse1click() end
+    end
+end
+
+function RemoveNametag(plr)
+    local nametag = AimbotModule.NametagInstances[plr]
+
+    if nametag then nametag:Remove() end
+end
+
+function SetESPTag()
+    if not AimbotModule.NametagEnabled then return end
+
+    local alive = {}
+
+    for I,plr in ipairs(Players:GetPlayers()) do
+        if plr ~= Player then 
+            alive[plr] = true
+
+            local Char = plr.Character
+
+            if not AimbotModule.NametagEnabled or Char then
+                RemoveNametag(plr)
+                continue
+            end
+
+            local ScreenVec,Visible = Camera:WorldToViewportPoint(Char:GetPivot().Position)
+
+            if not Visible then
+                RemoveNametag(plr)
+                continue
+            end
+
+            if not AimbotModule.NametagInstances[plr] then
+                local nametag = Drawing.new("Text")
+                nametag.Center = true
+                nametag.Outline = true
+                nametag.Size = 16
+                AimbotModule.NametagInstances[plr] = nametag
+            end
+
+            local nametag = AimbotModule.NametagInstances[plr]
+            nametag.Text = plr.DisplayName
+            nametag.Position = Vector2.new(ScreenVec.X,ScreenVec.Y)
+            nametag.Color = Color3.fromRGB(205,0,0)
+
+            if AimbotModule.RGBEnabled then
+                nametag.Color = AimbotModule.RGBColor
+            end
+        end
+    end
+end
+
 AimbotModule.Init = function()
     getgenv().BlizzAimbotActive = true
     AimbotModule.Enabled = false
@@ -136,7 +204,7 @@ function AimbotModule:SetSort(fn)
                 AimbotModule.CurrentSortFn = function(Local,Other)
                     return Other.Team.Name ~= Local.Team.Name
                 end
-            elseif fn == "Jailbreak" or "JB" then
+            elseif fn = "Jailbreak" or "JB" then
                 AimbotModule.CurrentSortFn = function(Local,Other)
                     return Other.Team.Name ~= Local.Team.Name
                 end
@@ -165,6 +233,18 @@ function AimbotModule:Toggle(Enabled)
     AimbotModule.Enabled = Enabled
 end
 
+function AimbotModule:Triggerbot(Enabled)
+    AimbotModule.TBEnabled = Enabled
+end
+
+function AimbotModule:Nametag(Enabled)
+    AimbotModule.NametagEnabled = Enabled
+end
+
+function AimbotModule:RGB(Enabled)
+    AimbotModule.RGBEnabled = Enabled
+end
+
 UIS.InputBegan:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
     if Input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -182,6 +262,13 @@ end)
 RunService.RenderStepped:Connect(function()
     SetClosest()
     LookAtTarget()
+    TriggerbotCheck()
+
+    local t = 5;
+
+	local hue = tick() % t / t
+	local color = Color3.fromHSV(hue, 1, 1)
+    AimbotModule.RGBColor = color
 end)
 
 return AimbotModule
