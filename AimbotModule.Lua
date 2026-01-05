@@ -6,6 +6,7 @@ AimbotModule.Active = false
 AimbotModule.MaxTrackingDistance = 500
 AimbotModule.CurrentSortFn = nil
 AimbotModule.Smoothness = 0
+AimbotModule.Prediction = 0.05
 
 if not getgenv().BlizzAimbotActive then
     getgenv().BlizzAimbotActive = false
@@ -77,6 +78,10 @@ function SetClosest()
 
     if Closest then
         AimbotModule.CurrentCharacter = Closest
+
+        local Highlight = workspace:FindFirstChild("BlizzAimbot_Target")
+        Highlight.Adornee = Closest
+        Highlight.Enabled = true
         if Closest:FindFirstChild("Head") then
             AimbotModule.CurrentTarget = Closest:FindFirstChild("Head")
         else
@@ -91,8 +96,7 @@ function LookAtTarget()
 
     local targetPart = AimbotModule.CurrentTarget
 
-    -- prediction time (seconds)
-    local predictionTime = 0.05
+    local predictionTime = AimbotModule.Prediction
 
     local velocity = targetPart.AssemblyLinearVelocity
     local predictedPosition =
@@ -126,8 +130,20 @@ AimbotModule.Init = function()
 end
 
 function AimbotModule:SetSort(fn)
-    if fn then
-        AimbotModule.CurrentSortFn = fn
+    if fn then 
+        if type(fn) == "string" then
+            if fn == "Arsenal" then
+                AimbotModule.CurrentSortFn = function(Local,Other)
+                    return Other.Team.Name ~= Local.Team.Name
+                end
+            elseif fn = "Jailbreak" or "JB" then
+                AimbotModule.CurrentSortFn = function(Local,Other)
+                    return Other.Team.Name ~= Local.Team.Name
+                end
+            end
+        else
+            AimbotModule.CurrentSortFn = fn
+        end
     else
         error("No Function given")
     end
@@ -135,6 +151,14 @@ end
 
 function AimbotModule:SetSmooth(Amount)
     AimbotModule.Smoothness = Amount
+end
+
+function AimbotModule:SetMaxDistance(Amount)
+    AimbotModule.MaxTrackingDistance = Amount
+end
+
+function AimbotModule:SetPrediction(Amount)
+    AimbotModule.Prediction = Amount
 end
 
 function AimbotModule:Toggle(Enabled)
