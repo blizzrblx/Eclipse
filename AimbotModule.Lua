@@ -150,44 +150,50 @@ function SetESPTag()
 
     local alive = {}
 
-    for I,plr in ipairs(Players:GetPlayers()) do
-        if plr ~= Player then 
-            alive[plr] = true
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= Player then
+            local char = plr.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-            local Char = plr.Character
-
-            if not AimbotModule.NametagEnabled or not Char then
+            if not hrp then
                 RemoveNametag(plr)
                 continue
             end
 
-            local ScreenVec,Visible = Camera:WorldToViewportPoint(Char:GetPivot().Position)
+            alive[plr] = true
 
-            if not Visible then
+            local screenPos, visible =
+                Camera:WorldToViewportPoint(hrp.Position)
+
+            if not visible then
                 RemoveNametag(plr)
                 continue
             end
 
             if not AimbotModule.NametagInstances[plr] then
-                local nametag = Drawing.new("Text")
-                nametag.Center = true
-                nametag.Outline = true
-                nametag.Size = 16
-                AimbotModule.NametagInstances[plr] = nametag
+                local tag = Drawing.new("Text")
+                tag.Center = true
+                tag.Outline = true
+                tag.Size = 16
+                tag.Visible = true
+                AimbotModule.NametagInstances[plr] = tag
             end
 
-            local nametag = AimbotModule.NametagInstances[plr]
-            nametag.Text = plr.DisplayName
-            nametag.Position = Vector2.new(ScreenVec.X,ScreenVec.Y)
-            nametag.Color = Color3.fromRGB(205,0,0)
-			nametag.Visible = true
+            local tag = AimbotModule.NametagInstances[plr]
+            tag.Text = plr.DisplayName
+            tag.Position = Vector2.new(screenPos.X, screenPos.Y)
+            tag.Color = AimbotModule.RGBEnabled and AimbotModule.RGBColor
+                or Color3.fromRGB(205, 0, 0)
+        end
+    end
 
-            if AimbotModule.RGBEnabled then
-                nametag.Color = AimbotModule.RGBColor
-            end
+    for plr in pairs(AimbotModule.NametagInstances) do
+        if not alive[plr] then
+            RemoveNametag(plr)
         end
     end
 end
+
 
 AimbotModule.Init = function()
     getgenv().BlizzAimbotActive = true
