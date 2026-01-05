@@ -184,8 +184,4 @@ RunService.RenderStepped:Connect(function()
     LookAtTarget()
 end)
 
-AimbotModule.Init()
-AimbotModule:SetSmooth(2)
-AimbotModule:SetSort("Arsenal")
-
 return AimbotModule
