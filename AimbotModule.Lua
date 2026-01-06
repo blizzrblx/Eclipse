@@ -289,10 +289,6 @@ UIS.InputEnded:Connect(function(Input,GameProcessed)
     end
 end)
 
-UIS.JumpRequest:Connect(function()
-    if AimbotModule.BHop == true then Player.Character:FindFirstChild("Humanoid"):ChangeState("Jumping") end
-end)
-
 RunService.RenderStepped:Connect(function()
     SetClosest()
     LookAtTarget()
@@ -304,6 +300,8 @@ RunService.RenderStepped:Connect(function()
 	local hue = tick() % t / t
 	local color = Color3.fromHSV(hue, 1, 1)
     AimbotModule.RGBColor = color
+
+	if AimbotModule.BHop == true then Player.Character:FindFirstChild("Humanoid"):ChangeState("Jumping") end
 end)
 
 return AimbotModule
