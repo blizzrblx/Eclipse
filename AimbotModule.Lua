@@ -14,6 +14,8 @@ AimbotModule.NametagEnabled = false
 AimbotModule.NametagInstances = {}
 AimbotModule.RGBEnabled = false
 AimbotModule.RGBColor = nil
+AimbotModule.DeadCheck = false
+AimbotModule.BHop = false
 
 local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
@@ -41,10 +43,22 @@ function FilterCharacters()
             if hrp then
                 if AimbotModule.CurrentSortFn then
                     if AimbotModule.CurrentSortFn(Player, plr) then
-                        table.insert(Chars, plr)
+                        if AimbotModule.DeadCheck then
+                            if char:FindFirstChild("Humanoid") and char:FindFirstChild("Humanoid").Health > 0 then
+                                table.insert(Chars, plr)
+                            end
+                        else
+                            table.insert(Chars, plr)
+                        end
                     end
                 else
-                    table.insert(Chars, plr)
+                    if AimbotModule.DeadCheck then
+                        if char:FindFirstChild("Humanoid") and char:FindFirstChild("Humanoid").Health > 0 then
+                            table.insert(Chars, plr)
+                        end
+                    else
+                        table.insert(Chars, plr)
+                    end
                 end
             end
         end
@@ -134,61 +148,64 @@ function TriggerbotCheck()
     end
 end
 
-function RemoveNametag(plr)
-    local nametag = AimbotModule.NametagInstances[plr]
+function RemoveNametag(Plr)
+    local tag = AimbotModule.NametagInstances[Plr]
 
-    if nametag then nametag:Remove() end
+    if tag then
+        tag:Remove()
+        AimbotModule.NametagInstances[Plr] = nil
+    end
 end
 
-function SetESPTag()
-    if not AimbotModule.NametagEnabled then return end
-
+function UpdateNameESP()
     local alive = {}
 
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= Player then
-            local char = plr.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    for I,Plr in ipairs(Players:GetPlayers()) do
+        if Plr == Player then continue end
 
-            if not hrp then
-                RemoveNametag(plr)
+        alive[Plr] = true
+
+        local Char = Plr.Character
+        if not AimbotModule.NametagEnabled or Char then
+            RemoveNametag(Plr)
+            continue
+        end
+        if Char then
+            
+            local ScreenPos, Visible = Camera:WorldToViewportPoint(Char:GetPivot() + Vector3.new(0,1.5,0))
+
+            if not Visible then
+                RemoveNametag(Plr)
                 continue
             end
 
-            alive[plr] = true
-
-            local screenPos, visible =
-                Camera:WorldToViewportPoint(hrp.Position)
-
-            if not visible then
-                RemoveNametag(plr)
-                continue
-            end
-
-            if not AimbotModule.NametagInstances[plr] then
+            if not AimbotModule.NametagInstances[Plr] then
                 local tag = Drawing.new("Text")
-                tag.Center = true
-                tag.Outline = true
+                tag.Centered = true
                 tag.Size = 16
-                tag.Visible = true
-                AimbotModule.NametagInstances[plr] = tag
+                tag.Outline = true
+                tag.Font = 2
+                AimbotModule.NametagInstances[Plr] = tag
             end
 
-            local tag = AimbotModule.NametagInstances[plr]
-            tag.Text = plr.DisplayName
-            tag.Position = Vector2.new(screenPos.X, screenPos.Y)
-            tag.Color = AimbotModule.RGBEnabled and AimbotModule.RGBColor
-                or Color3.fromRGB(205, 0, 0)
+            local tag = AimbotModule.NametagInstances[Plr]
+            tag.Text = Plr.DisplayName or Plr.Name
+            tag.Color = Color3.fromRGB(255,0,0)
+            tag.Position = Vector2.new(ScreenPos.X,ScreenPos.Y)
+            tag.Visible = true
+
+            if AimbotModule.RGBEnabled then
+                tag.Color = AimbotModule.RGBColor
+            end
         end
     end
 
-    for plr in pairs(AimbotModule.NametagInstances) do
-        if not alive[plr] then
-            RemoveNametag(plr)
+    for I,Plr in pairs(AimbotModule.NametagInstances) do
+        if not alive[Plr] then
+            RemoveNametag(Plr)
         end
     end
 end
-
 
 AimbotModule.Init = function()
     AimbotModule.Enabled = false
@@ -250,6 +267,10 @@ function AimbotModule:SetKeybind(Key)
     AimbotModule.CurrentKeybind = Key
 end
 
+function AimbotModule:ToggleDeadCheck(Enabled)
+    AimbotModule.DeadCheck = Enabled
+end
+
 UIS.InputBegan:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
     if Input.UserInputType == AimbotModule.CurrentKeybind or Input.KeyCode == AimbotModule.CurrentKeybind then
@@ -264,11 +285,15 @@ UIS.InputEnded:Connect(function(Input,GameProcessed)
     end
 end)
 
+UIS.JumpRequest:Connect(function()
+    if AimbotModule.BHop == true then Player.Character:FindFirstChild("Humanoid"):ChangeState("Jumping") end
+end)
+
 RunService.RenderStepped:Connect(function()
     SetClosest()
     LookAtTarget()
     TriggerbotCheck()
-	SetESPTag()
+	UpdateNameESP()
 
     local t = 5;
 
