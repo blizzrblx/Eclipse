@@ -247,10 +247,6 @@ function SetSpeed(dt)
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hum or not hrp then return end
 
-    if hum.FloorMaterial == Enum.Material.Air then
-        return
-    end
-
     local moveDir = hum.MoveDirection
     if moveDir.Magnitude == 0 then
         return
@@ -380,3 +376,4 @@ SaveManager:SetFolder("EclipseHub/jailbreak")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
+
