@@ -301,7 +301,16 @@ RunService.RenderStepped:Connect(function()
 	local color = Color3.fromHSV(hue, 1, 1)
     AimbotModule.RGBColor = color
 
-	if AimbotModule.BHop == true then Player.Character:FindFirstChild("Humanoid"):ChangeState("Jumping") end
+	if AimbotModule.BHop == true then
+        local Humanoid = Player.Character:FindFirstChild("Humanoid")
+        local State = Humanoid:GetState()
+
+        if State == Enum.HumanoidStateType.Jumping or Enum.HumanoidStateType.Falling then
+            continue
+        else
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
 end)
 
 return AimbotModule
