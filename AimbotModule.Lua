@@ -271,6 +271,10 @@ function AimbotModule:ToggleDeadCheck(Enabled)
     AimbotModule.DeadCheck = Enabled
 end
 
+function AimbotModule:ToggleBHop(Enabled)
+    AimbotModule.Bhop = Enabled
+end
+
 UIS.InputBegan:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
     if Input.UserInputType == AimbotModule.CurrentKeybind or Input.KeyCode == AimbotModule.CurrentKeybind then
