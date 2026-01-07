@@ -303,13 +303,11 @@ RunService.RenderStepped:Connect(function()
 
 	if AimbotModule.BHop == true then
         local Humanoid = Player.Character:FindFirstChild("Humanoid")
-        local State = Humanoid:GetState()
-
-        if State == Enum.HumanoidStateType.Jumping or Enum.HumanoidStateType.Falling then
-            continue
-        else
-            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
+        if Humanoid.FloorMaterial == Enum.Material.Air then
+			return
+		else
+			Humanoid:ChangeState("Jumping")
+		end
     end
 end)
 
