@@ -18,31 +18,30 @@ AimbotModule.DeadCheck = false
 AimbotModule.BHop = false
 AimbotModule.SpeedBoostEnabled = false
 AimbotModule.SpeedBoost = 0
+AimbotModule.AppliedSkins = {}
+
+local SkinCache = {}
+
+local Weapon_Repl_Folder = Instance.new("Folder",workspace)
+Weapon_Repl_Folder.Name = "BlizzAimbot_Folder"
+local Skin_Repl_Folder = Instance.new("Folder",workspace)
+Skin_Repl_Folder.Name = "BlizzAimbot_Skins_RIVALS"
 
 local weaponSkins = {
-    ["Bow"] = {"Compound Bow", "Raven Bow", "Key Bow", "Bat Bow", "Dream Bow", "Frostbite Bow", "Glorious Bow"},
-    ["Assault Rifle"] = {"AK-47", "AUG", "AKEY-47", "Gingerbread AUG", "Tommy Gun", "Boneclaw Rifle", "Glorious Assault Rifle", "Phoenix Rifle", "10B Visits"},
-    ["Chainsaw"] = {"Blobsaw", "Handsaws", "Buzzsaw", "Festive Buzzsaw", "Mega Drill", "Glorious Chainsaw"},
-    ["RPG"] = {"Nuke Launcher", "RPKEY", "Spaceship Launcher", "Firework Launcher" "Pumpkin Launcher" "Squid Launcher", "Glorious RPG", "Pencil Launcher"},
-    ["Burst Rifle"] = {"Aqua Burst", "Electro Rifle", "Keyst Rifle", "FAMAS", "Pixel Burst", "Glorious Burst Rifle", "Pine Burst", "Spectral Burst"},
-    ["Exogun"] = {"Singularity", "Wondergun", "Repulsor", "Exogourd", "Ray Gun", "Glorious Exogun", "Midnight Festive Exogun"},
-    ["Fists"] = {"Boxing Gloves", "Brass Knuckles", "Fists of Hurt", "Festive Fists", "Glorious Fists", "Pumpkin Claws"},
-    ["Energy Pistols"] = {"Soul Pistols", "Apex Pistols", "Void Pistols", "Hacker Pistols", "Hydro Pistols", "New Year Energy Pistols", "Glorious Energy Pistols"}
-    ["Flamethrower"] = {"Lamethrower", "Pixel Flamethrower", "Glitterthrower", "Snowblower", "Glorious Flamethrower"},
-    ["Flare Gun"] = {"Dynamite Gun", "Firework Gun", "Banana Flare", "Vexed Flare Gun", "Glorious Flare Gun", "Wrapped Flare Gun"},
-    ["Freeze Ray"] = {"Bubble Ray", "Temporal Ray", "Spider Ray", "Gum Ray", "Glorious Freeze Ray", "Wrapped Freeze Ray"},
-    ["Grenade"] = {"Water Balloon", "Whoopee Cushion", "Keynade", "Soul Grenade", "Jingle Grenade", "Dynamite", "Frozen Grenade", "Glorious Grenade"},
-    ["Grenade Launcher"] = {"Swashbuckler", "Uranium Launcher", "Skull Launcher", "Gearnade Launcher", "Snowball Launcher", "Glorious Grenade Launcher"},
-    ["Handgun"] = {"Blaster", "Hand Gun", "Pixel Handgun", "Gingerbread Handgun", "Glorious Handgun", "Gumball Handgun", "Pumpkin Handgun", "Towerstone Handgun", "Warp Handgun"},
-    ["Katana"] = {"Lightning Bolt", "Saber", "Arch Katana", "Crystal Katana", "Keytana", "Pixel Katana", "Devil's Trident", "New Year Katana", "Stellar Katana", "Glorious Katana"},
-    ["Minigun"] = {"Lasergun 3000", "Pixel Minigun", "Fighter Jet", "Glorious Minigun", "Pumpkin Minigun", "Wrapped Minigun"},
-    ["Paintball Gun"] = {"Boba Gun", "Slime Gun", "Brain Gun", "Snowball Gun", "Glorious Paintball Gun", "Ketchup Gun"},
-    ["Revolver"] = {"Sheriff", "Keyvolver", "Peppergun", "Peppermint Sheriff", "Boneclaw Revolver", "Desert Eagle", "Glorious Revolver"},
-    ["Slingshot"] = {"Goalpost", "Stick", "Harp", "Boneshot", "Reindeer Slingshot", "Glorious Slingshot"},
-    ["Subspace Tripmine"] = {"Don't Press", "Spring", "Dev-in-the-Box", "DIY Tripmine", "Glorious Subspace Tripmine", "Trick or Treat"},
-    ["Uzi"] = {"Electro Uzi", "Water Uzi", "Keyzi", "Money Gun", "Demon Uzi", "Glorious Uzi", "Pine Uzi"},
-    ["Sniper"] = {"Pixel Sniper", "Hyper Sniper", "Keyper", "Event Horizion", "Gingerbread Sniper", "Eyething Sniper", "Glorious Sniper"},
-    ["Knife"] = {"Karambit", "Chancla", "Keylisong", "Keyrambit", "Balisong", "Candy Cane", "Glorious Knife", "Machete"}}
+["Bow"] = {"Compound Bow", "Raven Bow", "Key Bow", "Bat Bow", "Dream Bow", "Frostbite Bow", "Glorious Bow"},
+["Assault Rifle"] = {"AK-47", "AUG", "AKEY-47", "Gingerbread AUG", "Tommy Gun", "Boneclaw Rifle", "Glorious Assault Rifle", "Phoenix Rifle", "10B Visits"},
+["Chainsaw"] = {"Blobsaw", "Handsaws", "Buzzsaw", "Festive Buzzsaw", "Mega Drill", "Glorious Chainsaw"},
+["RPG"] = {"Nuke Launcher", "RPKEY", "Spaceship Launcher", "Firework Launcher", "Pumpkin Launcher", "Squid Launcher", "Glorious RPG", "Pencil Launcher"},
+["Burst Rifle"] = {"Aqua Burst", "Electro Rifle", "Keyst Rifle", "FAMAS", "Pixel Burst", "Glorious Burst Rifle", "Pine Burst", "Spectral Burst"},
+["Exogun"] = {"Singularity", "Wondergun", "Repulsor", "Exogourd", "Ray Gun", "Glorious Exogun", "Midnight Festive Exogun"},
+["Fists"] = {"Boxing Gloves", "Brass Knuckles", "Fists of Hurt", "Festive Fists", "Glorious Fists", "Pumpkin Claws"},
+["Energy Pistols"] = {"Soul Pistols", "Apex Pistols", "Void Pistols", "Hacker Pistols", "Hydro Pistols", "New Year Energy Pistols", "Glorious Energy Pistols"}, 
+["Flamethrower"] = {"Lamethrower", "Pixel Flamethrower", "Glitterthrower", "Snowblower", "Glorious Flamethrower"},
+["Flare Gun"] = {"Dynamite Gun", "Firework Gun", "Banana Flare", "Vexed Flare Gun", "Glorious Flare Gun", "Wrapped Flare Gun"},
+["Freeze Ray"] = {"Bubble Ray", "Temporal Ray", "Spider Ray", "Gum Ray", "Glorious Freeze Ray", "Wrapped Freeze Ray"},
+["Grenade"] = {"Water Balloon", "Whoopee Cushion", "Keynade", "Soul Grenade", "Jingle Grenade", "Dynamite", "Frozen Grenade", "Glorious Grenade"},
+["Grenade Launcher"] = {"Swashbuckler", "Uranium Launcher", "Skull Launcher", "Gearnade Launcher", "Snowball Launcher", "Glorious Grenade Launcher"},
+["Handgun"] = {"Blaster", "Hand Gun", "Pixel Handgun", "Gingerbread Handgun", "Glorious Handgun", "Gumball Handgun", "Pumpkin Handgun", "Towerstone Handgun", "Warp Handgun"},["Katana"] = {"Lightning Bolt", "Saber", "Arch Katana", "Crystal Katana", "Keytana", "Pixel Katana", "Devil's Trident", "New Year Katana", "Stellar Katana", "Glorious Katana"},["Minigun"] = {"Lasergun 3000", "Pixel Minigun", "Fighter Jet", "Glorious Minigun", "Pumpkin Minigun", "Wrapped Minigun"},["Paintball Gun"] = {"Boba Gun", "Slime Gun", "Brain Gun", "Snowball Gun", "Glorious Paintball Gun", "Ketchup Gun"},["Revolver"] = {"Sheriff", "Keyvolver", "Peppergun", "Peppermint Sheriff", "Boneclaw Revolver", "Desert Eagle", "Glorious Revolver"},["Slingshot"] = {"Goalpost", "Stick", "Harp", "Boneshot", "Reindeer Slingshot", "Glorious Slingshot"},["Subspace Tripmine"] = {"Don't Press", "Spring", "Dev-in-the-Box", "DIY Tripmine", "Glorious Subspace Tripmine", "Trick or Treat"},["Uzi"] = {"Electro Uzi", "Water Uzi", "Keyzi", "Money Gun", "Demon Uzi", "Glorious Uzi", "Pine Uzi"},["Sniper"] = {"Pixel Sniper", "Hyper Sniper", "Keyper", "Event Horizion", "Gingerbread Sniper", "Eyething Sniper", "Glorious Sniper"},["Knife"] = {"Karambit", "Chancla", "Keylisong", "Keyrambit", "Balisong", "Candy Cane", "Glorious Knife", "Machete"}}
 
 local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
@@ -206,40 +205,102 @@ function SetSpeed(dt)
     )
 end
 
-function GetSwapped(NormalWeapon,Skin)
-    local FoundWeapon = weaponSkins[NormalWeapon]
-    if not FoundWeapon then return end
-    local FoundSkin = FoundWeapon[Skin]
-    if not FoundSkin then return end
+local function GetSkinCached(skinName)
+    if SkinCache[skinName] then
+        return SkinCache[skinName]
+    end
 
     local ViewModels = Player.PlayerScripts.Assets.ViewModels
-
-    for I, FoundVM in ipairs(ViewModels:GetDescendants()) do
-        local Is_Model = (typeof(FoundVM) == "Model")
-        if Is_Model then
-            return {
-                ["VM"] = FoundVM,
-                ["Weapon"] = NormalWeapon
-            }
+    for _, obj in ipairs(ViewModels:GetDescendants()) do
+        if obj:IsA("Model") and obj.Name == skinName then
+            local clone = obj:Clone()
+            clone.Parent = Skin_Repl_Folder
+            SkinCache[skinName] = clone
+            return clone
         end
     end
-    return nil
 end
 
-function ApplySkin(VMtbl)
-    local Vm = VMtbl.VM
-    local Weapon = VMtbl.Weapon
+local function GetCurrentWeapon()
+    local fp = workspace.ViewModels.FirstPerson
+    return fp and fp:FindFirstChildWhichIsA("Model")
+end
 
-    local ViewModels = workspace.ViewModels
+function GetWeapon(WeaponName)
+    local ViewModels = Player.PlayerScripts.Assets.ViewModels
+    local Weapons = ViewModels.Weapons
 
-    local FirstPerson = ViewModels.FirstPerson
+    for I,Found in pairs(Weapons:GetChildren()) do
+        if Found.Name == WeaponName and not Weapon_Repl_Folder:FindFirstChild(WeaponName) then
+            local Cloned = Found:Clone()
+            Cloned.Parent = Weapon_Repl_Folder
+            print("Cloned "..WeaponName.." Into "..Weapon_Repl_Folder.Name)
+        end
+    end
+end
 
-    local Model = FirstPerson:FindFirstChildOfClass("Model")
+function GetSkin(SkinName)
+    local ViewModels = Player.PlayerScripts.Assets.ViewModels
 
-    if string.find(Model.Name, Player.Name) then
-        local Visual = Model.ItemVisual
+    for _, obj in ipairs(ViewModels:GetDescendants()) do
+        if obj:IsA("Model") and obj.Name == SkinName and not Skin_Repl_Folder:FindFirstChild(SkinName) then
+            local clone = obj:Clone()
+            clone.Parent = Skin_Repl_Folder
+            return clone
+        end
+    end
+end
 
-        Weapon:PivotTo(Visual:GetPivot())
+local function ApplySkinToWeapon(weaponModel, skinModel)
+    if not weaponModel or not skinModel then return end
+
+    local visual = weaponModel:FindFirstChild("ItemVisual")
+    if not visual then return end
+
+    for _, v in ipairs(visual:GetChildren()) do
+        if v:IsA("Model") then
+            v:Destroy()
+        end
+    end
+
+    local skinClone = skinModel:Clone()
+    skinClone.Parent = visual
+    skinClone:PivotTo(visual:GetPivot())
+end
+
+function ApplySkin(SkinModel)
+    if not SkinModel or SkinModel:GetAttribute("Applied") then return end
+
+    local FirstPerson = workspace.ViewModels.FirstPerson
+    local weapon = FirstPerson:FindFirstChildWhichIsA("Model")
+    if not weapon then return end
+
+    local visual = weapon:FindFirstChild("ItemVisual")
+    if not visual then return end
+
+    for _, v in ipairs(visual:GetChildren()) do
+        if v:IsA("Model") then
+            v:Destroy()
+        end
+    end
+
+    SkinModel.Parent = visual
+    SkinModel:PivotTo(visual:GetPivot())
+    SkinModel:SetAttribute("Applied", true)
+end
+
+function IsValidSkin(Weapon,SkinName)
+    local ValidWeapon = weaponSkins[Weapon]
+
+    if ValidWeapon then
+        local ValidSkin = table.find(ValidWeapon,SkinName)
+        if ValidSkin then
+            return true
+        else
+            return false
+        end
+    else
+        return false
     end
 end
 
@@ -307,6 +368,21 @@ function AimbotModule:ToggleBHop(Enabled)
     AimbotModule.BHop = Enabled
 end
 
+function AimbotModule:SwapSkin(Weapon, SkinName)
+    if not IsValidSkin(Weapon, SkinName) then
+        warn("Invalid skin:", Weapon, SkinName)
+        return
+    end
+
+    local skin = GetSkinCached(SkinName)
+    if not skin then
+        warn("Skin not found:", SkinName)
+        return
+    end
+
+    AimbotModule.AppliedSkins[Weapon] = skin
+end
+
 UIS.InputBegan:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
     if Input.UserInputType == AimbotModule.CurrentKeybind or Input.KeyCode == AimbotModule.CurrentKeybind then
@@ -321,11 +397,12 @@ UIS.InputEnded:Connect(function(Input,GameProcessed)
     end
 end)
 
+local lastWeapon = nil
+
 RunService.RenderStepped:Connect(function(dt)
     SetClosest()
     LookAtTarget()
     TriggerbotCheck()
-    UpdateNameESP()
     SetSpeed(dt)
 
     local t = 5
@@ -349,6 +426,21 @@ RunService.RenderStepped:Connect(function(dt)
     if humanoid.FloorMaterial ~= Enum.Material.Air then
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
+
+    local weapon = GetCurrentWeapon()
+    if weapon == lastWeapon then return end
+    lastWeapon = weapon
+
+    for weaponName, skinModel in pairs(AimbotModule.AppliedSkins) do
+        if weapon.Name == weaponName then
+            ApplySkinToWeapon(weapon, skinModel)
+            break
+        end
+    end
 end)
 
-return AimbotModule
+AimbotModule.Init()
+AimbotModule:Toggle(true)
+AimbotModule:SwapSkin("Assault Rifle", "AUG")
+AimbotModule:SwapSkin("Energy Pistols", "Void Pistols")
+AimbotModule:SwapSkin("Katana", "Devil's Trident")
