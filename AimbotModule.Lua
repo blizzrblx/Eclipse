@@ -264,7 +264,8 @@ local function ApplySkinToWeapon(weaponModel, skinModel)
     end
 
     local skinClone = skinModel:Clone()
-    skinClone.Parent = visual
+    skinClone.Parent = weaponModel
+    skinClone.Name = "ItemVisual"
     skinClone:PivotTo(visual:GetPivot())
 end
 
