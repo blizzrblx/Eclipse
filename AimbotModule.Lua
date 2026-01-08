@@ -16,6 +16,33 @@ AimbotModule.RGBEnabled = false
 AimbotModule.RGBColor = nil
 AimbotModule.DeadCheck = false
 AimbotModule.BHop = false
+AimbotModule.SpeedBoostEnabled = false
+AimbotModule.SpeedBoost = 0
+
+local weaponSkins = {
+    ["Bow"] = {"Compound Bow", "Raven Bow", "Key Bow", "Bat Bow", "Dream Bow", "Frostbite Bow", "Glorious Bow"},
+    ["Assault Rifle"] = {"AK-47", "AUG", "AKEY-47", "Gingerbread AUG", "Tommy Gun", "Boneclaw Rifle", "Glorious Assault Rifle", "Phoenix Rifle", "10B Visits"},
+    ["Chainsaw"] = {"Blobsaw", "Handsaws", "Buzzsaw", "Festive Buzzsaw", "Mega Drill", "Glorious Chainsaw"},
+    ["RPG"] = {"Nuke Launcher", "RPKEY", "Spaceship Launcher", "Firework Launcher" "Pumpkin Launcher" "Squid Launcher", "Glorious RPG", "Pencil Launcher"},
+    ["Burst Rifle"] = {"Aqua Burst", "Electro Rifle", "Keyst Rifle", "FAMAS", "Pixel Burst", "Glorious Burst Rifle", "Pine Burst", "Spectral Burst"},
+    ["Exogun"] = {"Singularity", "Wondergun", "Repulsor", "Exogourd", "Ray Gun", "Glorious Exogun", "Midnight Festive Exogun"},
+    ["Fists"] = {"Boxing Gloves", "Brass Knuckles", "Fists of Hurt", "Festive Fists", "Glorious Fists", "Pumpkin Claws"},
+    ["Energy Pistols"] = {"Soul Pistols", "Apex Pistols", "Void Pistols", "Hacker Pistols", "Hydro Pistols", "New Year Energy Pistols", "Glorious Energy Pistols"}
+    ["Flamethrower"] = {"Lamethrower", "Pixel Flamethrower", "Glitterthrower", "Snowblower", "Glorious Flamethrower"},
+    ["Flare Gun"] = {"Dynamite Gun", "Firework Gun", "Banana Flare", "Vexed Flare Gun", "Glorious Flare Gun", "Wrapped Flare Gun"},
+    ["Freeze Ray"] = {"Bubble Ray", "Temporal Ray", "Spider Ray", "Gum Ray", "Glorious Freeze Ray", "Wrapped Freeze Ray"},
+    ["Grenade"] = {"Water Balloon", "Whoopee Cushion", "Keynade", "Soul Grenade", "Jingle Grenade", "Dynamite", "Frozen Grenade", "Glorious Grenade"},
+    ["Grenade Launcher"] = {"Swashbuckler", "Uranium Launcher", "Skull Launcher", "Gearnade Launcher", "Snowball Launcher", "Glorious Grenade Launcher"},
+    ["Handgun"] = {"Blaster", "Hand Gun", "Pixel Handgun", "Gingerbread Handgun", "Glorious Handgun", "Gumball Handgun", "Pumpkin Handgun", "Towerstone Handgun", "Warp Handgun"},
+    ["Katana"] = {"Lightning Bolt", "Saber", "Arch Katana", "Crystal Katana", "Keytana", "Pixel Katana", "Devil's Trident", "New Year Katana", "Stellar Katana", "Glorious Katana"},
+    ["Minigun"] = {"Lasergun 3000", "Pixel Minigun", "Fighter Jet", "Glorious Minigun", "Pumpkin Minigun", "Wrapped Minigun"},
+    ["Paintball Gun"] = {"Boba Gun", "Slime Gun", "Brain Gun", "Snowball Gun", "Glorious Paintball Gun", "Ketchup Gun"},
+    ["Revolver"] = {"Sheriff", "Keyvolver", "Peppergun", "Peppermint Sheriff", "Boneclaw Revolver", "Desert Eagle", "Glorious Revolver"},
+    ["Slingshot"] = {"Goalpost", "Stick", "Harp", "Boneshot", "Reindeer Slingshot", "Glorious Slingshot"},
+    ["Subspace Tripmine"] = {"Don't Press", "Spring", "Dev-in-the-Box", "DIY Tripmine", "Glorious Subspace Tripmine", "Trick or Treat"},
+    ["Uzi"] = {"Electro Uzi", "Water Uzi", "Keyzi", "Money Gun", "Demon Uzi", "Glorious Uzi", "Pine Uzi"},
+    ["Sniper"] = {"Pixel Sniper", "Hyper Sniper", "Keyper", "Event Horizion", "Gingerbread Sniper", "Eyething Sniper", "Glorious Sniper"},
+    ["Knife"] = {"Karambit", "Chancla", "Keylisong", "Keyrambit", "Balisong", "Candy Cane", "Glorious Knife", "Machete"}}
 
 local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
@@ -148,62 +175,71 @@ function TriggerbotCheck()
     end
 end
 
-function RemoveNametag(Plr)
-    local tag = AimbotModule.NametagInstances[Plr]
+function SetSpeed(dt)
+    if not AimbotModule.SpeedBoostEnabled then return end
 
-    if tag then
-        tag:Remove()
-        AimbotModule.NametagInstances[Plr] = nil
+    local char = Player.Character
+    if not char then return end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return end
+
+    local moveDir = hum.MoveDirection
+    if moveDir.Magnitude == 0 then
+        return
     end
+
+    local targetSpeed = hum.WalkSpeed + AimbotModule.SpeedBoost
+
+    local horizontalVel = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+
+    local desiredVel = moveDir * targetSpeed
+
+    local accel = 8
+    local newVel = horizontalVel:Lerp(desiredVel, math.clamp(accel * dt, 0, 1))
+
+    hrp.Velocity = Vector3.new(
+        newVel.X,
+        hrp.Velocity.Y,
+        newVel.Z
+    )
 end
 
-function UpdateNameESP()
-    local alive = {}
+function GetSwapped(NormalWeapon,Skin)
+    local FoundWeapon = weaponSkins[NormalWeapon]
+    if not FoundWeapon then return end
+    local FoundSkin = FoundWeapon[Skin]
+    if not FoundSkin then return end
 
-    for I,Plr in ipairs(Players:GetPlayers()) do
-        if Plr == Player then continue end
+    local ViewModels = Player.PlayerScripts.Assets.ViewModels
 
-        alive[Plr] = true
-
-        local Char = Plr.Character
-        if not AimbotModule.NametagEnabled or Char then
-            RemoveNametag(Plr)
-            continue
-        end
-        if Char then
-            
-            local ScreenPos, Visible = Camera:WorldToViewportPoint(Char:GetPivot() + Vector3.new(0,1.5,0))
-
-            if not Visible then
-                RemoveNametag(Plr)
-                continue
-            end
-
-            if not AimbotModule.NametagInstances[Plr] then
-                local tag = Drawing.new("Text")
-                tag.Centered = true
-                tag.Size = 16
-                tag.Outline = true
-                tag.Font = 2
-                AimbotModule.NametagInstances[Plr] = tag
-            end
-
-            local tag = AimbotModule.NametagInstances[Plr]
-            tag.Text = Plr.DisplayName or Plr.Name
-            tag.Color = Color3.fromRGB(255,0,0)
-            tag.Position = Vector2.new(ScreenPos.X,ScreenPos.Y)
-            tag.Visible = true
-
-            if AimbotModule.RGBEnabled then
-                tag.Color = AimbotModule.RGBColor
-            end
+    for I, FoundVM in ipairs(ViewModels:GetDescendants()) do
+        local Is_Model = (typeof(FoundVM) == "Model")
+        if Is_Model then
+            return {
+                ["VM"] = FoundVM,
+                ["Weapon"] = NormalWeapon
+            }
         end
     end
+    return nil
+end
 
-    for I,Plr in pairs(AimbotModule.NametagInstances) do
-        if not alive[Plr] then
-            RemoveNametag(Plr)
-        end
+function ApplySkin(VMtbl)
+    local Vm = VMtbl.VM
+    local Weapon = VMtbl.Weapon
+
+    local ViewModels = workspace.ViewModels
+
+    local FirstPerson = ViewModels.FirstPerson
+
+    local Model = FirstPerson:FindFirstChildOfClass("Model")
+
+    if string.find(Model.Name, Player.Name) then
+        local Visual = Model.ItemVisual
+
+        Weapon:PivotTo(Visual:GetPivot())
     end
 end
 
@@ -255,10 +291,6 @@ function AimbotModule:ToggleTriggerbot(Enabled)
     AimbotModule.TBEnabled = Enabled
 end
 
-function AimbotModule:ToggleNametag(Enabled)
-    AimbotModule.NametagEnabled = Enabled
-end
-
 function AimbotModule:ToggleRGB(Enabled)
     AimbotModule.RGBEnabled = Enabled
 end
@@ -272,7 +304,7 @@ function AimbotModule:ToggleDeadCheck(Enabled)
 end
 
 function AimbotModule:ToggleBHop(Enabled)
-    AimbotModule.Bhop = Enabled
+    AimbotModule.BHop = Enabled
 end
 
 UIS.InputBegan:Connect(function(Input,GameProcessed)
@@ -289,25 +321,33 @@ UIS.InputEnded:Connect(function(Input,GameProcessed)
     end
 end)
 
-RunService.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function(dt)
     SetClosest()
     LookAtTarget()
     TriggerbotCheck()
-	UpdateNameESP()
+    UpdateNameESP()
+    SetSpeed(dt)
 
-    local t = 5;
+    local t = 5
+    local hue = tick() % t / t
+    AimbotModule.RGBColor = Color3.fromHSV(hue, 1, 1)
 
-	local hue = tick() % t / t
-	local color = Color3.fromHSV(hue, 1, 1)
-    AimbotModule.RGBColor = color
+    if not AimbotModule.BHop then
+        return
+    end
 
-	if AimbotModule.BHop == true then
-        local Humanoid = Player.Character:FindFirstChild("Humanoid")
-        if Humanoid.FloorMaterial == Enum.Material.Air then
-			return
-		else
-			Humanoid:ChangeState("Jumping")
-		end
+    local char = Player.Character
+    if not char then
+        return
+    end
+
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        return
+    end
+
+    if humanoid.FloorMaterial ~= Enum.Material.Air then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
