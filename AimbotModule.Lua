@@ -6,7 +6,7 @@ AimbotModule.Enabled = false
 AimbotModule.Active = false
 AimbotModule.MaxTrackingDistance = 500
 AimbotModule.CurrentSortFn = nil
-AimbotModule.Smoothness = 0
+AimbotModule.Smoothness = 1
 AimbotModule.Prediction = 0.05
 AimbotModule.TBEnabled = false
 AimbotModule.TBTarget = "Head"
@@ -18,18 +18,28 @@ AimbotModule.DeadCheck = false
 AimbotModule.BHop = false
 AimbotModule.SpeedBoostEnabled = false
 AimbotModule.SpeedBoost = 0
-AimbotModule.AppliedSkins = {}
-
-local SkinCache = {}
-
-local Weapon_Repl_Folder = Instance.new("Folder",workspace)
-Weapon_Repl_Folder.Name = "BlizzAimbot_Folder"
-local Skin_Repl_Folder = Instance.new("Folder",workspace)
-Skin_Repl_Folder.Name = "BlizzAimbot_Skins_RIVALS"
+AimbotModule.HideWeapons = false
+AimbotModule.NoClip = false
 
 local weaponSkins = {
 ["Bow"] = {"Compound Bow", "Raven Bow", "Key Bow", "Bat Bow", "Dream Bow", "Frostbite Bow", "Glorious Bow"},
 ["Assault Rifle"] = {"AK-47", "AUG", "AKEY-47", "Gingerbread AUG", "Tommy Gun", "Boneclaw Rifle", "Glorious Assault Rifle", "Phoenix Rifle", "10B Visits"},
+["Crossbow"] = {"Pixel Crossbow", "Arch Crossbow", "Frostbite Crossbow", "Harpoon Crossbow", "Violin Crossbow", "Crossbone", "Glorious Crossbow"},
+["Gunblade"] = {"Gunsaw", "Hyper Gunblade", "Boneblade", "Crude Gunblade", "Elf's Gunblade", "Glorious Gunblade"},
+["Shotgun"] = {"Balloon Shotgun", "Shotkey", "Hyper Shotgun", "Broomstick", "Cactus Shotgun", "Glorious Shotgun", "Wrapped Shotgun"},
+["Energy Rifle"] = {"Apex Rifle"},
+["Daggers"] = {"Crystal Daggers", "Keynais", "Aces", "Bat Daggers", "Cookies", "Glorious Daggers", "Paper Planes", "Shurikens"},
+["Shorty"] = {"Balloon Shorty", "Demon Shorty", "Glorious Shorty", "Lovely Shorty", "Not so Shorty", "Too Shorty", "Wrapped Shorty"},
+["Spray"] = {"Spray Bottle", "Glorious Spray", "Boneclaw Spray", "Lovely Spray", "Pine Spray", "Nail Gun"},
+["Battle Axe"] = {"Keyttle Axe", "Cerulean Axe", "Mimic Axe", "The Shred", "Ban Axe", "Nordic Axe", "Glorious Battle Axe"},
+["Riot Shield"] = {"Door", "Sled", "Glorious Riot Shield", "Energy Shield", "Masterpiece", "Tombstone Shield"},
+["Scythe"] = {"Crystal Scythe", "Keythe", "Anchor", "Bat Scythe", "Sakura Scythe", "Cryo Scythe", "Scythe of Death", "Glorious Scythe"},
+["Trowel"] = {"Garden Shovel", "Plastic Shovel", "Glorious Trowel", "Paintbrush", "Pumpkin Carver", "Snow Shovel"},
+["Flashbang"] = {"Disco Ball", "Camera", "Pixel Flashbang", "Shining Star", "Lightbulb", "Skullbang", "Glorious Flashbang"},
+["Jump Pad"] = {"Bounce House", "Jolly Man", "Shady Chicken Sandwich", "Spider Web", "Trampoline", "Glorious Jump Pad"},
+["Molotov"] = {"Hot Coals", "Glorious Molotov", "Coffee", "Torch", "Vexed Molotov", "Lava Lamp"},
+["Satchel"] = {"Advanced Satchel", "Potion Satchel", "Glorious Satchel", "Notebook Satchel", "Bag o' Money", "Suspicious Gift"},
+["Smoke Grenade"] = {"Emoji Cloud", "Eyeball", "Hourglass", "Snowglobe", "Balance", "Glorious Smoke Grenade"},
 ["Chainsaw"] = {"Blobsaw", "Handsaws", "Buzzsaw", "Festive Buzzsaw", "Mega Drill", "Glorious Chainsaw"},
 ["RPG"] = {"Nuke Launcher", "RPKEY", "Spaceship Launcher", "Firework Launcher", "Pumpkin Launcher", "Squid Launcher", "Glorious RPG", "Pencil Launcher"},
 ["Burst Rifle"] = {"Aqua Burst", "Electro Rifle", "Keyst Rifle", "FAMAS", "Pixel Burst", "Glorious Burst Rifle", "Pine Burst", "Spectral Burst"},
@@ -41,7 +51,18 @@ local weaponSkins = {
 ["Freeze Ray"] = {"Bubble Ray", "Temporal Ray", "Spider Ray", "Gum Ray", "Glorious Freeze Ray", "Wrapped Freeze Ray"},
 ["Grenade"] = {"Water Balloon", "Whoopee Cushion", "Keynade", "Soul Grenade", "Jingle Grenade", "Dynamite", "Frozen Grenade", "Glorious Grenade"},
 ["Grenade Launcher"] = {"Swashbuckler", "Uranium Launcher", "Skull Launcher", "Gearnade Launcher", "Snowball Launcher", "Glorious Grenade Launcher"},
-["Handgun"] = {"Blaster", "Hand Gun", "Pixel Handgun", "Gingerbread Handgun", "Glorious Handgun", "Gumball Handgun", "Pumpkin Handgun", "Towerstone Handgun", "Warp Handgun"},["Katana"] = {"Lightning Bolt", "Saber", "Arch Katana", "Crystal Katana", "Keytana", "Pixel Katana", "Devil's Trident", "New Year Katana", "Stellar Katana", "Glorious Katana"},["Minigun"] = {"Lasergun 3000", "Pixel Minigun", "Fighter Jet", "Glorious Minigun", "Pumpkin Minigun", "Wrapped Minigun"},["Paintball Gun"] = {"Boba Gun", "Slime Gun", "Brain Gun", "Snowball Gun", "Glorious Paintball Gun", "Ketchup Gun"},["Revolver"] = {"Sheriff", "Keyvolver", "Peppergun", "Peppermint Sheriff", "Boneclaw Revolver", "Desert Eagle", "Glorious Revolver"},["Slingshot"] = {"Goalpost", "Stick", "Harp", "Boneshot", "Reindeer Slingshot", "Glorious Slingshot"},["Subspace Tripmine"] = {"Don't Press", "Spring", "Dev-in-the-Box", "DIY Tripmine", "Glorious Subspace Tripmine", "Trick or Treat"},["Uzi"] = {"Electro Uzi", "Water Uzi", "Keyzi", "Money Gun", "Demon Uzi", "Glorious Uzi", "Pine Uzi"},["Sniper"] = {"Pixel Sniper", "Hyper Sniper", "Keyper", "Event Horizion", "Gingerbread Sniper", "Eyething Sniper", "Glorious Sniper"},["Knife"] = {"Karambit", "Chancla", "Keylisong", "Keyrambit", "Balisong", "Candy Cane", "Glorious Knife", "Machete"}}
+["Handgun"] = {"Blaster", "Hand Gun", "Pixel Handgun", "Gingerbread Handgun", "Glorious Handgun", "Gumball Handgun", "Pumpkin Handgun", "Towerstone Handgun", "Warp Handgun"},
+["Katana"] = {"Lightning Bolt", "Saber", "Arch Katana", "Crystal Katana", "Keytana", "Pixel Katana", "Devil's Trident", "New Year Katana", "Stellar Katana", "Glorious Katana"},
+["Minigun"] = {"Lasergun 3000", "Pixel Minigun", "Fighter Jet", "Glorious Minigun", "Pumpkin Minigun", "Wrapped Minigun"},
+["Paintball Gun"] = {"Boba Gun", "Slime Gun", "Brain Gun", "Snowball Gun", "Glorious Paintball Gun", "Ketchup Gun"},
+["Revolver"] = {"Sheriff", "Keyvolver", "Peppergun", "Peppermint Sheriff", "Boneclaw Revolver", "Desert Eagle", "Glorious Revolver"},
+["Slingshot"] = {"Goalpost", "Stick", "Harp", "Boneshot", "Reindeer Slingshot", "Glorious Slingshot"},
+["Subspace Tripmine"] = {"Don't Press", "Spring", "Dev-in-the-Box", "DIY Tripmine", "Glorious Subspace Tripmine", "Trick or Treat"},
+["Uzi"] = {"Electro Uzi", "Water Uzi", "Keyzi", "Money Gun", "Demon Uzi", "Glorious Uzi", "Pine Uzi"},
+["Sniper"] = {"Pixel Sniper", "Hyper Sniper", "Keyper", "Event Horizion", "Gingerbread Sniper", "Eyething Sniper", "Glorious Sniper"},
+["Knife"] = {"Karambit", "Chancla", "Keylisong", "Keyrambit", "Balisong", "Candy Cane", "Glorious Knife", "Machete"},
+["Medkit"] = {"Laptop", "Medkitty", "Briefcase", "Milk & Cookies", "Bucket of Candy", "Glorious Medkit"},
+["War Horn"] = {"Trumpet", "Air Horn", "Boneclaw Horn", "Mammoth Horn", "Glorious War Horn", "Megaphone"}}
 
 local Player = game:GetService("Players").LocalPlayer
 local Mouse = Player:GetMouse()
@@ -205,103 +226,36 @@ function SetSpeed(dt)
     )
 end
 
-local function GetSkinCached(skinName)
-    if SkinCache[skinName] then
-        return SkinCache[skinName]
-    end
-
+function Swap(WeaponName,SkinName)
     local ViewModels = Player.PlayerScripts.Assets.ViewModels
-    for _, obj in ipairs(ViewModels:GetDescendants()) do
-        if obj:IsA("Model") and obj.Name == skinName then
-            local clone = obj:Clone()
-            clone.Parent = Skin_Repl_Folder
-            SkinCache[skinName] = clone
-            return clone
+    local Weapon_Default = ViewModels.Weapons:FindFirstChild(WeaponName)
+
+    if Weapon_Default then
+        local Weapon_Skin = nil
+
+        for I,skin in ipairs(ViewModels:GetDescendants()) do
+            if skin:IsA("Model") then
+                if skin.Name == SkinName then
+                    Weapon_Skin = skin
+                end
+            end
         end
-    end
-end
 
-local function GetCurrentWeapon()
-    local fp = workspace.ViewModels.FirstPerson
-    return fp and fp:FindFirstChildWhichIsA("Model")
-end
-
-function GetWeapon(WeaponName)
-    local ViewModels = Player.PlayerScripts.Assets.ViewModels
-    local Weapons = ViewModels.Weapons
-
-    for I,Found in pairs(Weapons:GetChildren()) do
-        if Found.Name == WeaponName and not Weapon_Repl_Folder:FindFirstChild(WeaponName) then
-            local Cloned = Found:Clone()
-            Cloned.Parent = Weapon_Repl_Folder
-            print("Cloned "..WeaponName.." Into "..Weapon_Repl_Folder.Name)
+        if Weapon_Skin == nil then
+            warn("Error: Could not find a weapon model for target gun. Try fixing spelling")
         end
-    end
-end
 
-function GetSkin(SkinName)
-    local ViewModels = Player.PlayerScripts.Assets.ViewModels
+        local ValidSkin = table.find(weaponSkins[WeaponName],SkinName)
 
-    for _, obj in ipairs(ViewModels:GetDescendants()) do
-        if obj:IsA("Model") and obj.Name == SkinName and not Skin_Repl_Folder:FindFirstChild(SkinName) then
-            local clone = obj:Clone()
-            clone.Parent = Skin_Repl_Folder
-            return clone
-        end
-    end
-end
+        if not ValidSkin then warn("Invalid skin name") end
 
-local function ApplySkinToWeapon(weaponModel, skinModel)
-    if not weaponModel or not skinModel then return end
+        local Cloned = Weapon_Skin:Clone()
+        Cloned.Name = WeaponName
+        Cloned.Parent = ViewModels.Weapons
 
-    local visual = weaponModel:FindFirstChild("ItemVisual")
-    if not visual then return end
-
-    for _, v in ipairs(visual:GetChildren()) do
-        if v:IsA("Model") then
-            v:Destroy()
-        end
-    end
-
-    local skinClone = skinModel:Clone()
-    skinClone.Parent = weaponModel
-    skinClone.Name = "ItemVisual"
-    skinClone:PivotTo(visual:GetPivot())
-end
-
-function ApplySkin(SkinModel)
-    if not SkinModel or SkinModel:GetAttribute("Applied") then return end
-
-    local FirstPerson = workspace.ViewModels.FirstPerson
-    local weapon = FirstPerson:FindFirstChildWhichIsA("Model")
-    if not weapon then return end
-
-    local visual = weapon:FindFirstChild("ItemVisual")
-    if not visual then return end
-
-    for _, v in ipairs(visual:GetChildren()) do
-        if v:IsA("Model") then
-            v:Destroy()
-        end
-    end
-
-    SkinModel.Parent = visual
-    SkinModel:PivotTo(visual:GetPivot())
-    SkinModel:SetAttribute("Applied", true)
-end
-
-function IsValidSkin(Weapon,SkinName)
-    local ValidWeapon = weaponSkins[Weapon]
-
-    if ValidWeapon then
-        local ValidSkin = table.find(ValidWeapon,SkinName)
-        if ValidSkin then
-            return true
-        else
-            return false
-        end
+        Weapon_Default:Destroy()
     else
-        return false
+        warn("Invalid weapon name")
     end
 end
 
@@ -370,18 +324,15 @@ function AimbotModule:ToggleBHop(Enabled)
 end
 
 function AimbotModule:SwapSkin(Weapon, SkinName)
-    if not IsValidSkin(Weapon, SkinName) then
-        warn("Invalid skin:", Weapon, SkinName)
-        return
-    end
+    Swap(Weapon,SkinName)
+end
 
-    local skin = GetSkinCached(SkinName)
-    if not skin then
-        warn("Skin not found:", SkinName)
-        return
-    end
+function AimbotModule:HideWeapons(Enabled)
+    AimbotModule.HideWeapons = Enabled
+end
 
-    AimbotModule.AppliedSkins[Weapon] = skin
+function AimbotModule:ToggleNoClip(Enabled)
+    AimbotModule.NoClip = Enabled
 end
 
 UIS.InputBegan:Connect(function(Input,GameProcessed)
@@ -425,23 +376,32 @@ RunService.RenderStepped:Connect(function(dt)
     end
 
     if humanoid.FloorMaterial ~= Enum.Material.Air then
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        task.delay(0.25,function()
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end)
     end
 
-    local weapon = GetCurrentWeapon()
-    if weapon == lastWeapon then return end
-    lastWeapon = weapon
+    if AimbotModule.HideWeapons == true then
+        for I, thing in pairs(workspace.ViewModels.FirstPerson:GetDescendants()) do
+            if thing:IsA("MeshPart") then thing.Transparency = 1 end
+        end
+    end
 
-    for weaponName, skinModel in pairs(AimbotModule.AppliedSkins) do
-        if weapon.Name == weaponName then
-            ApplySkinToWeapon(weapon, skinModel)
-            break
+    if AimbotModule.RGBEnabled == true then
+        for I, thing in pairs(workspace.ViewModels.FirstPerson:GetDescendants()) do
+            if thing:IsA("MeshPart") then thing.Color = AimbotModule.RGBColor or Color3.fromHSV(hue, 1, 1) end
+        end
+    end
+
+    if AimbotModule.NoClip == true then
+        for I,limb in pairs(char:GetChildren()) do
+            if limb:IsA("BasePart") then limb.CanCollide = false end
+        end
+    else
+        for I,limb in pairs(char:GetChildren()) do
+            if limb:IsA("BasePart") then limb.CanCollide = true end
         end
     end
 end)
 
-AimbotModule.Init()
-AimbotModule:Toggle(true)
-AimbotModule:SwapSkin("Assault Rifle", "AUG")
-AimbotModule:SwapSkin("Energy Pistols", "Void Pistols")
-AimbotModule:SwapSkin("Katana", "Devil's Trident")
+return AimbotModule
