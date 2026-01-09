@@ -33,7 +33,7 @@ local weaponSkins = {
 ["Spray"] = {"Spray Bottle", "Glorious Spray", "Boneclaw Spray", "Lovely Spray", "Pine Spray", "Nail Gun"},
 ["Battle Axe"] = {"Keyttle Axe", "Cerulean Axe", "Mimic Axe", "The Shred", "Ban Axe", "Nordic Axe", "Glorious Battle Axe"},
 ["Riot Shield"] = {"Door", "Sled", "Glorious Riot Shield", "Energy Shield", "Masterpiece", "Tombstone Shield"},
-["Scythe"] = {"Crystal Scythe", "Keythe", "Anchor", "Bat Scythe", "Sakura Scythe", "Cryo Scythe", "Scythe of Death", "Glorious Scythe"},
+["Scythe"] = {"Crystal Scythe", "Keythe", "Anchor", "Bat Scythe", "Sakura Scythe", "Cryo Scythe", "Scythe of Death", "Glorious Scythe", "Bug Net"},
 ["Trowel"] = {"Garden Shovel", "Plastic Shovel", "Glorious Trowel", "Paintbrush", "Pumpkin Carver", "Snow Shovel"},
 ["Flashbang"] = {"Disco Ball", "Camera", "Pixel Flashbang", "Shining Star", "Lightbulb", "Skullbang", "Glorious Flashbang"},
 ["Jump Pad"] = {"Bounce House", "Jolly Man", "Shady Chicken Sandwich", "Spider Web", "Trampoline", "Glorious Jump Pad"},
@@ -249,6 +249,8 @@ function Swap(WeaponName,SkinName)
 
         if not ValidSkin then warn("Invalid skin name") end
 
+        if not Weapon_Skin then warn("Invalid Skin "..SkinName.." for Weapon "..WeaponName) return end
+
         local Cloned = Weapon_Skin:Clone()
         Cloned.Name = WeaponName
         Cloned.Parent = ViewModels.Weapons
@@ -335,6 +337,14 @@ function AimbotModule:ToggleNoClip(Enabled)
     AimbotModule.NoClip = Enabled
 end
 
+function AimbotModule:SetSpeed(Amount)
+    AimbotModule.SpeedBoost = tonumber(Amount)
+end
+
+function AimbotModule:ToggleSpeedBoost(Enabled)
+    AimbotModule.SpeedBoostEnabled = Enabled
+end
+
 UIS.InputBegan:Connect(function(Input,GameProcessed)
     if GameProcessed then return end
     if Input.UserInputType == AimbotModule.CurrentKeybind or Input.KeyCode == AimbotModule.CurrentKeybind then
@@ -361,29 +371,28 @@ RunService.RenderStepped:Connect(function(dt)
     local hue = tick() % t / t
     AimbotModule.RGBColor = Color3.fromHSV(hue, 1, 1)
 
-    if not AimbotModule.BHop then
-        return
-    end
-
     local char = Player.Character
-    if not char then
-        return
-    end
 
     local humanoid = char:FindFirstChildOfClass("Humanoid")
-    if not humanoid then
-        return
-    end
 
-    if humanoid.FloorMaterial ~= Enum.Material.Air then
-        task.delay(0.25,function()
-            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        end)
+    if AimbotModule.BHop then
+
+        humanoid.JumpHeight = 5
+       
+        if humanoid.FloorMaterial ~= Enum.Material.Air then
+            task.delay(0.2,function()
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end)
+        end
     end
 
     if AimbotModule.HideWeapons == true then
         for I, thing in pairs(workspace.ViewModels.FirstPerson:GetDescendants()) do
             if thing:IsA("MeshPart") then thing.Transparency = 1 end
+        end
+    else
+        for I, thing in pairs(workspace.ViewModels.FirstPerson:GetDescendants()) do
+            if thing:IsA("MeshPart") then thing.Transparency = 0 end
         end
     end
 
@@ -403,5 +412,3 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 end)
-
-return AimbotModule
