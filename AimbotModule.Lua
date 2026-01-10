@@ -351,7 +351,7 @@ function AimbotModule:ToggleSpeedBoost(Enabled)
     AimbotModule.SpeedBoostEnabled = Enabled
 end
 
-function AimbotModule:SwapSkinBetter()
+function AimbotModule:SwapSkinBetter(weaponName,skinName)
     if not CurrentVM or CurrentVM._destroyed then
         return
     end
