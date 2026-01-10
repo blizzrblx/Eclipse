@@ -1,4 +1,5 @@
 local AimbotModule = {}
+AimbotModule.FOVCircle = nil
 AimbotModule.CurrentKeybind = Enum.UserInputType.MouseButton2
 AimbotModule.CurrentTarget = nil
 AimbotModule.CurrentCharacter = nil
@@ -22,10 +23,8 @@ AimbotModule.HideWeapons = false
 AimbotModule.NoClip = false
 
 local weaponSkins = {
-["Bow"] = {"Compound Bow", "Raven Bow", "Key Bow", "Bat Bow", "Dream Bow", "Frostbite Bow", "Glorious Bow"},
 ["Assault Rifle"] = {"AK-47", "AUG", "AKEY-47", "Gingerbread AUG", "Tommy Gun", "Boneclaw Rifle", "Glorious Assault Rifle", "Phoenix Rifle", "10B Visits"},
 ["Gunblade"] = {"Gunsaw", "Hyper Gunblade", "Boneblade", "Crude Gunblade", "Elf's Gunblade", "Glorious Gunblade"},
-["Energy Rifle"] = {"Apex Rifle"},
 ["Daggers"] = {"Crystal Daggers", "Keynais", "Aces", "Bat Daggers", "Cookies", "Glorious Daggers", "Paper Planes", "Shurikens"},
 ["Shorty"] = {"Balloon Shorty", "Demon Shorty", "Glorious Shorty", "Lovely Shorty", "Not so Shorty", "Too Shorty", "Wrapped Shorty"},
 ["Spray"] = {"Spray Bottle", "Glorious Spray", "Boneclaw Spray", "Lovely Spray", "Pine Spray", "Nail Gun"},
@@ -37,7 +36,6 @@ local weaponSkins = {
 ["Jump Pad"] = {"Bounce House", "Jolly Man", "Shady Chicken Sandwich", "Spider Web", "Trampoline", "Glorious Jump Pad"},
 ["Molotov"] = {"Hot Coals", "Glorious Molotov", "Coffee", "Torch", "Vexed Candle", "Lava Lamp"},
 ["Smoke Grenade"] = {"Emoji Cloud", "Eyeball", "Hourglass", "Snowglobe", "Balance", "Glorious Smoke Grenade"},
-["Chainsaw"] = {"Blobsaw", "Handsaws", "Buzzsaw", "Festive Buzzsaw", "Mega Drill", "Glorious Chainsaw"},
 ["Burst Rifle"] = {"Aqua Burst", "Electro Rifle", "Keyst Rifle", "FAMAS", "Pixel Burst", "Glorious Burst Rifle", "Pine Burst", "Spectral Burst"},
 ["Exogun"] = {"Singularity", "Wondergun", "Repulsor", "Exogourd", "Ray Gun", "Glorious Exogun", "Midnight Festive Exogun"},
 ["Fists"] = {"Boxing Gloves", "Brass Knuckles", "Fists of Hurt", "Festive Fists", "Glorious Fists", "Pumpkin Claws"},
@@ -51,7 +49,6 @@ local weaponSkins = {
 ["Katana"] = {"Lightning Bolt", "Saber", "Arch Katana", "Crystal Katana", "Keytana", "Pixel Katana", "Devil's Trident", "New Year Katana", "Stellar Katana", "Glorious Katana"},
 ["Minigun"] = {"Lasergun 3000", "Pixel Minigun", "Fighter Jet", "Glorious Minigun", "Pumpkin Minigun", "Wrapped Minigun"},
 ["Paintball Gun"] = {"Boba Gun", "Slime Gun", "Brain Gun", "Snowball Gun", "Glorious Paintball Gun", "Ketchup Gun"},
-["Revolver"] = {"Sheriff", "Keyvolver", "Peppergun", "Peppermint Sheriff", "Boneclaw Revolver", "Desert Eagle", "Glorious Revolver"},
 ["Slingshot"] = {"Goalpost", "Stick", "Harp", "Boneshot", "Reindeer Slingshot", "Glorious Slingshot"},
 ["Subspace Tripmine"] = {"Don't Press", "Spring", "Dev-in-the-Box", "DIY Tripmine", "Glorious Subspace Tripmine", "Trick or Treat"},
 ["Uzi"] = {"Electro Uzi", "Water Uzi", "Keyzi", "Money Gun", "Demon Uzi", "Glorious Uzi", "Pine Uzi"},
@@ -74,6 +71,10 @@ local RunService = GetService("RunService")
 
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+
+local RequireEnabled, notEnabled = pcall(function()
+    local ClientVM = require(Player.PlayerScripts.Modules.ClientReplicatedClasses.ClientFighter.ClientItem.ClientViewModel)
+end)
 
 function FilterCharacters()
     local Chars = {}
@@ -259,13 +260,19 @@ function Swap(WeaponName,SkinName)
         warn("Invalid weapon name "..WeaponName)
     end
 end
-
 AimbotModule.Init = function()
     AimbotModule.Enabled = false
     
     local TargetHighlight = Instance.new("Highlight",workspace)
     TargetHighlight.Name = "BlizzAimbot_Target"
     TargetHighlight.Enabled = false
+
+    AimbotModule.FOVCircle = Drawing.new("Circle")
+    AimbotModule.FOVCircle.NumSides = 36
+    AimbotModule.FOVCircle.Size = 10
+    AimbotModule.FOVCircle.Thickness = 2
+    AimbotModule.FOVCircle.Color = AimbotModule.RGBEnabled and AimbotModule.RGBColor or Color3.fromRGB(255,0,0)
+    AimbotModule.FOVCircle.Visible = true
 end
 
 function AimbotModule:SetSort(fn)
@@ -342,6 +349,47 @@ end
 
 function AimbotModule:ToggleSpeedBoost(Enabled)
     AimbotModule.SpeedBoostEnabled = Enabled
+end
+
+function AimbotModule:SwapSkinBetter()
+    if not CurrentVM or CurrentVM._destroyed then
+        return
+    end
+
+    local vm = CurrentVM
+
+    if weaponName and vm.Name ~= weaponName then
+        return
+    end
+
+    local skinList = weaponSkins[vm.Name]
+    if not skinList then return end
+
+    if not skinName then
+        skinName = skinList[math.random(1, #skinList)]
+    end
+
+    if not RequireEnabled then
+        warn("Error: Unsupported Executor. [Executor "..identifyexecutor().." is not supported]")
+        return
+    end
+
+    local Utility = require(game:GetService("ReplicatedStorage").Modules.Utility)
+    local ViewModels = Player.PlayerScripts.Assets.ViewModels
+
+    local source = Utility:LookThrough(ViewModels, skinName)
+    if not source then return end
+
+    local skin = source:Clone()
+    skin:ScaleTo(vm._original_scale)
+
+    if vm.ItemModel then
+        vm.ItemModel:Destroy()
+    end
+
+    vm.ItemModel = skin
+    skin.Name = "ItemVisual"
+    skin.Parent = vm.Model
 end
 
 UIS.InputBegan:Connect(function(Input,GameProcessed)
