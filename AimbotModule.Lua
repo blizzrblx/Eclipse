@@ -227,6 +227,7 @@ function SetSpeed(dt)
 end
 
 function Swap(WeaponName,SkinName)
+    if not WeaponName or not SkinName then return end
     local ViewModels = Player.PlayerScripts.Assets.ViewModels
     local Weapon_Default = ViewModels.Weapons:FindFirstChild(WeaponName)
 
