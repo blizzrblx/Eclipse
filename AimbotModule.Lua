@@ -242,6 +242,8 @@ function Swap(WeaponName,SkinName)
             warn("Error: Could not find a weapon model for target gun. Try fixing spelling")
         end
 
+        if not weaponSkins[WeaponName] then return end
+
         local ValidSkin = table.find(weaponSkins[WeaponName],SkinName)
 
         if not ValidSkin then warn("Invalid skin name "..SkinName) end
