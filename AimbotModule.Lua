@@ -247,7 +247,7 @@ function Swap(WeaponName,SkinName)
 
         local ValidSkin = table.find(weaponSkins[WeaponName],SkinName)
 
-        if not ValidSkin then warn("Invalid skin name") end
+        if not ValidSkin then warn("Invalid skin name "..SkinName) end
 
         if not Weapon_Skin then warn("Invalid Skin "..SkinName.." for Weapon "..WeaponName) return end
 
@@ -257,7 +257,7 @@ function Swap(WeaponName,SkinName)
 
         Weapon_Default:Destroy()
     else
-        warn("Invalid weapon name")
+        warn("Invalid weapon name "..WeaponName)
     end
 end
 
