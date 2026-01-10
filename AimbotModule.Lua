@@ -412,3 +412,4 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 end)
+return AimbotModule
