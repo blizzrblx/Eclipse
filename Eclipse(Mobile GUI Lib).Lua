@@ -102,6 +102,12 @@ function Sidebar:NewToggle(Settings)
 	local enabled = Settings.Default
 
 	Settings.Callback(enabled)
+
+	if Settings.Default == false then
+		new.Text = Settings.Text..'[<font color = "rgb(205,0,0)">Disabled</font>]'
+	else
+		new.Text = Settings.Text..'[<font color = "rgb(0,205,0)">Enabled</font>]'
+	end
 	
 	new.MouseButton1Down:Connect(function()
 		enabled = not enabled
