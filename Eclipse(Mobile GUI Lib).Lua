@@ -99,7 +99,9 @@ function Sidebar:NewToggle(Settings)
 	new_corner.CornerRadius = UDim.new(0,10)
 	new_corner.Parent = new
 	
-	local enabled = false
+	local enabled = Settings.Default
+
+	Settings.Callback(enabled)
 	
 	new.MouseButton1Down:Connect(function()
 		enabled = not enabled
