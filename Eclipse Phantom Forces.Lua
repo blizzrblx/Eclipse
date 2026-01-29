@@ -21,6 +21,9 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 
 local lua_src = game:HttpGet("https://raw.githubusercontent.com/blizzrblx/Eclipse/refs/heads/main/Eclipse%20Phantom%20Forces.Lua")
 
+local Options = Library.Options
+local Toggles = Library.Toggles
+
 local Window = Library:CreateWindow({
     Title = "Eclipse | PF",
     Footer = Version,
@@ -28,6 +31,13 @@ local Window = Library:CreateWindow({
     NotifySide = "Right",
     ToggleKeybind = Enum.KeyCode.RightControl,
 })
+
+local DraggableLabel = Library:AddDraggableLabel("Obsidian demo")
+DraggableLabel:SetVisible(true)
+ 
+local FrameTimer = tick()
+local FrameCounter = 0;
+local FPS = 60;
 
 local Tabs = {
     Home = Window:AddTab("Home", "house"),
@@ -100,6 +110,40 @@ local ScriptChangelog = ScriptInfoBox:AddUIPassthrough("Changelog", {
 })
 
 local GameInfoBox = Tabs.Home:AddRightGroupbox("Game Info")
-local GameName = GameInfoBox:AddLabel(game.Name,true)
+local GameName = GameInfoBox:AddLabel("[NEW YEARS UPDATE] Phantom Forces",true)
+local PlayersInGame = GameInfoBox:AddLabel(tostring(#Players:GetPlayers()),true)
+
+local TyBox = Tabs.Home:AddLeftGroupbox("Note from Developer")
+local TyNote = TyBox:AddLabel("Eclipse is still in early beta, thanks for using and supporting the script!\n\n Made with ♥ by blizz :)",true)
 
 if current_data.script_executions == 0 then PlayerInfoBox_Name:SetText("Welcome to Eclipse, "..Player.Name) end
+
+function calculate_delta(to,from)
+    local returnedvec = Ve
+end
+
+local AimbotToggleBox = Tabs.Aimbot:AddLeftTabbox("Aimbot")
+local AimbotToggleGroup = AimbotToggleBox:AddTab("Toggle")
+lcoal AimbotToggleSettingsGroup = AimbotToggleBox:AddTab("Basic Settings")
+
+AimbotToggleGroup:AddToggle({
+    Text = "Toggle Aimbot",
+    Default = false
+})
+
+RunService.RenderStepped:Connect(function(dt)
+    PlayersInGame:SetText(tostring(#Players:GetPlayers()).." Players in server")
+
+    FrameCounter += 1;
+ 
+    if (tick() - FrameTimer) >= 1 then
+        FPS = FrameCounter;
+        FrameTimer = tick();
+        FrameCounter = 0;
+    end
+ 
+    DraggableLabel:SetText(('Eclipse | %s fps | %s ms'):format(
+        math.floor(FPS),
+        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
+    ))
+end)
