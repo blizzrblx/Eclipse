@@ -1,6 +1,72 @@
+local aimbotenabled = false
+local aimbotsmooth = 0
+local higlightaimbottarget = false
+local aimbotmaxdistance = math.huge
+local aimbotprediction = 0
+local aimbotteamcheck = false
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+
+local Camera = workspace.CurrentCamera
+
+function getclosestcharacter()
+    local closest = nil
+    local lastdistance = math.huge
+
+    for _, charmodel in ipairs(workspace.Players:GetDescendants()) do
+        if charmodel:IsA("Model") then
+            local nametaggui = charmodel:FindFirstChildWhichIsA("BillboardGui", true)
+            if nametaggui and nametaggui:FindFirstChild("PlayerTag") then
+                local ptag = nametaggui.PlayerTag
+                local distance =
+                    (Camera.CFrame.Position - charmodel:GetPivot().Position).Magnitude
+
+                if distance < lastdistance then
+                    if aimbotteamcheck then
+                        if not ptag.Visible then
+                            closest = charmodel
+                            lastdistance = distance
+                        end
+                    else
+                        closest = charmodel
+                        lastdistance = distance
+                    end
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+function vec2delta(to, from)
+    local x = to.X - from.X
+    local y = to.Y - from.Y
+    return x, y
+end
+
+function aimbotmove()
+    local closest = getclosestcharacter()
+    if not closest then return end
+
+    local pos, onscreen =
+        Camera:WorldToViewportPoint(closest:GetPivot().Position)
+    if not onscreen then return end
+
+    local smooth = math.max(aimbotsmooth, 1)
+
+    local mouse = UserInputService:GetMouseLocation()
+    local pos2d = Vector2.new(pos.X, pos.Y)
+
+    local x, y = vec2delta(pos2d, mouse)
+    mousemoverel(x / smooth, y / smooth)
+end
+
 
 --//CHECK THIS
 --//////////////////////
@@ -12,8 +78,6 @@ local Changelog = {
 }
 --//////////////////////
 --// CHECK THIS
-
-local Player = Players.LocalPlayer
 	
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/main/Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua"))()
@@ -71,14 +135,16 @@ local PlayerInfoBox = Tabs.Home:AddLeftGroupbox("Player Info")
 local PlayerInfoBox_Name = PlayerInfoBox:AddLabel("Thanks for using Eclipse, "..Player.Name,true)
 local PlayerInfoBox_Executions = PlayerInfoBox:AddLabel("Eclipse has been ran "..tostring(current_data.script_executions).." times",true)
 
-local ViewportBox = Tabs.Home:AddLeftGroupbox("Character View")
-local ViewportBox_Viewport = ViewportBox:AddViewport("CharacterViewport", {
-	Object = Player.Character,
-	Camera = Instance.new("Camera"),
-	Interactive = true,
-	AutoFocus = true,
-	Height = 250,
-})
+if Player.Character then
+    local ViewportBox = Tabs.Home:AddLeftGroupbox("Character View")
+    local ViewportBox_Viewport = ViewportBox:AddViewport("CharacterViewport", {
+	    Object = Player.Character,
+	    Camera = Instance.new("Camera"),
+	    Interactive = true,
+	    AutoFocus = true,
+	    Height = 250,
+    })  
+end
 
 local ScriptInfoBox = Tabs.Home:AddRightGroupbox("Script Info")
 local ScriptVersion = ScriptInfoBox:AddLabel("Running Version: "..Version,true)
@@ -118,17 +184,26 @@ local TyNote = TyBox:AddLabel("Eclipse is still in early beta, thanks for using 
 
 if current_data.script_executions == 0 then PlayerInfoBox_Name:SetText("Welcome to Eclipse, "..Player.Name) end
 
-function calculate_delta(to,from)
-    local returnedvec = Ve
-end
-
 local AimbotToggleBox = Tabs.Aimbot:AddLeftTabbox("Aimbot")
 local AimbotToggleGroup = AimbotToggleBox:AddTab("Toggle")
-lcoal AimbotToggleSettingsGroup = AimbotToggleBox:AddTab("Basic Settings")
+local AimbotToggleSettingsGroup = AimbotToggleBox:AddTab("Basic Settings")
 
-AimbotToggleGroup:AddToggle({
+AimbotToggleGroup:AddToggle("Toggle Aimbot",{
     Text = "Toggle Aimbot",
     Default = false
+}):OnChanged(function(State) aimbotenabled = State end)
+
+AimbotToggleSettingsGroup:AddSlider("Smoothness",{
+    Text = "Smoothness",
+    Default = 0,
+    Min = 0,
+    Max = 20,
+    Rounding = 0,
+})
+
+AimbotToggleSettingsGroup:AddToggle("Highlight Target",{
+    Text = "Highlight Target",
+    Default = false,
 })
 
 RunService.RenderStepped:Connect(function(dt)
@@ -146,4 +221,6 @@ RunService.RenderStepped:Connect(function(dt)
         math.floor(FPS),
         math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
     ))
+
+    if aimbotenabled then aimbotmove() end
 end)
