@@ -14,6 +14,8 @@ local Player = Players.LocalPlayer
 
 local Camera = workspace.CurrentCamera
 
+local playerhighlight = Instance.new("Highlight",game:GetService("CoreGui"))
+
 function getclosestcharacter()
     local closest = nil
     local lastdistance = math.huge
@@ -53,6 +55,10 @@ end
 function aimbotmove()
     local closest = getclosestcharacter()
     if not closest then return end
+
+    if higlightaimbottarget then
+        playerhighlight.Adornee = closest
+    end
 
     local pos, onscreen =
         Camera:WorldToViewportPoint(closest:GetPivot().Position)
@@ -201,10 +207,12 @@ AimbotToggleSettingsGroup:AddSlider("Smoothness",{
     Rounding = 0,
 })
 
+Toggles.Smoothness:OnChanged(function(Value) aimbotsmooth = Value end)
+
 AimbotToggleSettingsGroup:AddToggle("Highlight Target",{
     Text = "Highlight Target",
     Default = false,
-})
+}):OnChanged(function(State) higlightaimbottarget = State end)
 
 RunService.RenderStepped:Connect(function(dt)
     PlayersInGame:SetText(tostring(#Players:GetPlayers()).." Players in server")
@@ -222,5 +230,5 @@ RunService.RenderStepped:Connect(function(dt)
         math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
     ))
 
-    if aimbotenabled then aimbotmove() end
+    if aimbotenabled == true then aimbotmove() end
 end)
