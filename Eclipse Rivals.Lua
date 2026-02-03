@@ -17,6 +17,10 @@ local HttpService = game:GetService("HttpService")
 
 local Lighting = game:GetService("Lighting")
 
+local CoreGui = game:GetService("CoreGui")
+local Assets = Instance.new("Folder",CoreGui)
+Assets.Name = Assets
+
 local data = {
 	["executions"] = 0,
 	["src_downloaded"] = false,
@@ -29,12 +33,34 @@ local aimbot_actives = {
 
 local visual_actives = {
 	lightingchangeenabled = false,
-	ambientcolor = Color3.new(0.5,0.5,0.5),
+	ambientcolor = Color3.new(1,1,1),
+    shadowsenabled = true,
+    lightingtechnology = Enum.Technology.ShadowMap,
+
+    espenabled = false,
+    advancedespenabled = false
+    espcolor = Color3.new(1,0,0),
+    espfillcolor = Color3.new(1,0,0),
+    espbordercolor = Color3.new(1,1,1),
+    esptransparency = 0,
 }
 
 local visual_instances = {
 	ColorCorrection = Instance.new("ColorCorrectionEffect",Lighting),
 }
+
+function lightingstringtotechnology(str)
+    local lightingtechnologys = {
+        ["Realistic"] = Enum.LightingStyle.Realistic,
+        ["Soft"] = Enum.LightingStyle.Soft,
+    }
+
+    if table.find(lightingtechnologys,str) then
+        return table.find(lightingtechnologys,str)
+    else
+        return lightingtechnologys.Soft
+    end
+end
 
 function buildfiles()
 	if not isfolder("Eclipse") then makefolder("Eclipse") end
@@ -236,21 +262,65 @@ end
 
 local LightingSettingsGroupBox = Tabs.Visuals:AddLeftGroupbox("Lighting Settings")
 
+local EspSettingsTabBox = Tabs.Visuals:AddRightTabbox("Esp")
+local EspToggleTab = EspSettingsTabBox:AddTab("Toggle Esp")
+local EspSettingsTab = EspSettingsTabBox:AddTab("Settings")
+
 local LightingSettingsEnabledToggle = LightingSettingsGroupBox:AddToggle("Toggle Lighting Settings", {
     Text = "Toggle Lighting Settings",
     Default = false,
 	Callback = function(state)
 		visual_actives.lightingchangeenabled = state
-	end
+	end,
 })
 
-local LightingColorPicker = LightingSettingsEnabledToggle:AddColorPicker("Ambient Lighting Color Picker", {
-    Default = Color3.new(0.5,0.5,0.5),
+local LightingColorPickerLabel = LightingSettingsGroupBox:AddLabel("Lighting Tint Color",true)
+
+local LightingColorPicker = LightingColorPickerLabel:AddColorPicker("Lighting Color Picker", {
+    Default = Color3.new(1,1,1),
     Title = "Choose a color",
 	Callback = function()
-		visual_actives.ambientcolor = Options["Ambient Lighting Color Picker"].Value
-	end
+		visual_actives.ambientcolor = Options["Lighting Color Picker"].Value
+	end,
 })
+
+local LightingShadowToggle = LightingSettingsGroupBox:AddToggle("Lighting Shadows", {
+    Text = "Toggle Lighting Shadows",
+    Default = true,
+    Callback = function(state)
+        visual_actives.shadowsenabled = state
+    end,
+})
+
+local LightingTechnologyDropdown = LightingSettingsGroupBox:AddDropdown("Lighting Technology Dropdown", {
+    Text = "Lighting Technology",
+    Values = { "Realistic", "Soft"},
+    Default = 2,
+    Multi = false,
+    Callback = function()
+        visual_actives.lightingtechnology = lightingstringtotechnology(Options["Lighting Technology Dropdown"].Value)
+        print(Options["Lighting Technology Dropdown"].Value)
+    end,
+})
+
+local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
+    Text = "Toggle ESP",
+    Default = false,
+    Callback = function(state)
+        visual_actives.espenabled = state
+    end,
+})
+
+local EspColorLabel = EspToggleTab:AddLabel("ESP Color",true)
+local EspColorPicker = EspColorLabel:AddColorPicker("Esp Color Picker", {
+    Default = Color3.new(1,0,0),
+    Title = "Choose a color",
+	Callback = function()
+		visual_actives.espcolor = Options["Esp Color Picker"].Value
+	end,
+})
+
+local 
 
 RunService.RenderStepped:Connect(function(dt)
 	FrameCounter += 1
@@ -264,7 +334,7 @@ RunService.RenderStepped:Connect(function(dt)
 	DraggableLabel:SetText(('Eclipse | %s fps | %s ms'):format(
 		math.floor(FPS),
 		math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
-		))
+	))
 
 	TeamColor = Player.TeamColor.Color
 
@@ -279,5 +349,43 @@ RunService.RenderStepped:Connect(function(dt)
 
 	if visual_actives.lightingchangeenabled then
 		visual_instances.ColorCorrection.TintColor = visual_actives.ambientcolor
+        Lighting.GlobalShadows = visual_actives.shadowsenabled
+        Lighting.LightingStyle = visual_actives.lightingtechnology
 	end
+
+    if visual_actives.espenabled then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= Player then
+                local char = plr.Character
+
+                if not Assets:FindFirstChild(plr.Name) then
+                    local esp_instance = Instance.new("Highlight",Assets)
+                    esp_instance.Name = plr.Name
+                    esp_instance.Adornee = char
+                    esp_instance.FillColor = visual_actives.espcolor
+                    esp_instance.OutlineColor = visual_actives.espcolor
+
+                    if visual_actives.advancedespenabled then
+                        esp_instance.FillColor = visual_actives.espfillcolor
+                        esp_instance.OutlineColor = visual_actives.espbordercolor
+                    end
+                else
+                    local esp_instance = Assets:FindFirstChild(plr.Name)
+                    esp_instance.Name = plr.Name
+                    esp_instance.Adornee = char
+                    esp_instance.FillColor = visual_actives.espcolor
+                    esp_instance.OutlineColor = visual_actives.espcolor
+
+                    if visual_actives.advancedespenabled then
+                        esp_instance.FillColor = visual_actives.espfillcolor
+                        esp_instance.OutlineColor = visual_actives.espbordercolor
+                    end
+                end
+            end
+        end
+    else
+        for _,v in pairs(Assets:GetChildren()) do
+            v:Destroy()
+        end
+    end
 end)
