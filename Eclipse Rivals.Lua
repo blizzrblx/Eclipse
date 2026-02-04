@@ -19,7 +19,7 @@ local Lighting = game:GetService("Lighting")
 
 local CoreGui = game:GetService("CoreGui")
 local Assets = Instance.new("Folder",CoreGui)
-Assets.Name = Assets
+Assets.Name = "Assets"
 
 local data = {
 	["executions"] = 0,
@@ -35,10 +35,10 @@ local visual_actives = {
 	lightingchangeenabled = false,
 	ambientcolor = Color3.new(1,1,1),
     shadowsenabled = true,
-    lightingtechnology = Enum.Technology.ShadowMap,
+    lightingtechnology = Enum.LightingStyle.Soft,
 
     espenabled = false,
-    advancedespenabled = false
+    advancedespenabled = false,
     espcolor = Color3.new(1,0,0),
     espfillcolor = Color3.new(1,0,0),
     espbordercolor = Color3.new(1,1,1),
@@ -276,14 +276,6 @@ local LightingSettingsEnabledToggle = LightingSettingsGroupBox:AddToggle("Toggle
 
 local LightingColorPickerLabel = LightingSettingsGroupBox:AddLabel("Lighting Tint Color",true)
 
-local LightingColorPicker = LightingColorPickerLabel:AddColorPicker("Lighting Color Picker", {
-    Default = Color3.new(1,1,1),
-    Title = "Choose a color",
-	Callback = function()
-		visual_actives.ambientcolor = Options["Lighting Color Picker"].Value
-	end,
-})
-
 local LightingShadowToggle = LightingSettingsGroupBox:AddToggle("Lighting Shadows", {
     Text = "Toggle Lighting Shadows",
     Default = true,
@@ -299,8 +291,20 @@ local LightingTechnologyDropdown = LightingSettingsGroupBox:AddDropdown("Lightin
     Multi = false,
     Callback = function()
         visual_actives.lightingtechnology = lightingstringtotechnology(Options["Lighting Technology Dropdown"].Value)
-        print(Options["Lighting Technology Dropdown"].Value)
     end,
+})
+
+local LightingTintColorToggle = LightingSettingsGroupBox:AddToggle("Lighting Tint Enabled", {
+    Text = "Lighting Tint Enabled",
+    Default = false,
+})
+local LightingTintColorPicker = LightingTintColorToggle:AddColorPicker("Lighting Tint Color Picker", {
+    Default = Color3.new(1,1,1),
+    Title = "Choose A Color",
+    Callback = function()
+        visual_actives.ambientcolor = Options["Lighting Tint Color Picker"].Value
+        LightingTintColorLabel:SetText("Tint Color | Current: "..Options["Lighting Tint Color Picker"].Value)
+    end
 })
 
 local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
@@ -312,16 +316,6 @@ local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
 })
 
 local EspColorLabel = EspToggleTab:AddLabel("ESP Color",true)
-local EspColorPicker = EspColorLabel:AddColorPicker("Esp Color Picker", {
-    Default = Color3.new(1,0,0),
-    Title = "Choose a color",
-	Callback = function()
-		visual_actives.espcolor = Options["Esp Color Picker"].Value
-	end,
-})
-
-local 
-
 RunService.RenderStepped:Connect(function(dt)
 	FrameCounter += 1
 
@@ -387,5 +381,9 @@ RunService.RenderStepped:Connect(function(dt)
         for _,v in pairs(Assets:GetChildren()) do
             v:Destroy()
         end
+    end
+
+    for i, v in pairs(Assets:GetChildren()) do
+        if not Players:FindFirstChild(v.Name) then v:Destroy() end
     end
 end)
