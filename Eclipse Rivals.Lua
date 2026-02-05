@@ -286,14 +286,7 @@ local LightingTechnologyDropdown = LightingSettingsGroupBox:AddDropdown("Lightin
     end,
 })
 
-local LightingTintColorToggle = LightingSettingsGroupBox:AddToggle("Lighting Tint Enabled", {
-    Text = "Lighting Tint Enabled",
-    Default = false,
-    Callback = function(state)
-        visual_actives.lightingtintenabled = state
-    end,
-})
-local LightingTintColorPicker = LightingTintColorToggle:AddColorPicker("Lighting Tint Color Picker", {
+LightingSettingsGroupBox:AddLabel("Lighting Tint Color",true):AddColorPicker("Lighting Tint Color Picker", {
     Default = Color3.new(1,1,1),
     Title = "Choose A Color",
     Callback = function()
@@ -310,7 +303,10 @@ local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
     end,
 })
 
-local EspColorLabel = EspToggleTab:AddLabel("ESP Color",true)
+local EspColorLabel = EspToggleTab:AddToggle("ESP Color", {
+    Text = "Toggle ESP Color Settings",
+    Default = false,
+})
 EspColorLabel:AddColorPicker("OW",{
     Default = Color3.new(1,0.67,0.67),
     Title = "OW OW OW 67"
@@ -341,9 +337,7 @@ RunService.RenderStepped:Connect(function(dt)
 	PlayersInGameLabel:SetText("Players in Server: "..#Players:GetPlayers())
 
 	if visual_actives.lightingchangeenabled then
-		if visual_actives.lightingtintenabled then
-            visual_instances.ColorCorrection.TintColor = visual_actives.ambientcolor
-        end
+        visual_instances.ColorCorrection.TintColor = visual_actives.ambientcolor
         Lighting.GlobalShadows = visual_actives.shadowsenabled
         Lighting.LightingStyle = visual_actives.lightingtechnology
 	end
