@@ -5,6 +5,15 @@ local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))
 
 Library.ForceCheckbox = true
 
+SaveManager:SetLibrary(Library)
+ 
+SaveManager:IgnoreThemeSettings()
+ 
+SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
+
+SaveManager:SetFolder("Eclipse/Rivals")
+SaveManager:LoadAutoloadConfig()
+
 local Options = Library.Options
 local Toggles = Library.Toggles
 
@@ -34,6 +43,7 @@ local aimbot_actives = {
 local visual_actives = {
 	lightingchangeenabled = false,
 	ambientcolor = Color3.new(1,1,1),
+    lightingtintenabled = false,
     shadowsenabled = true,
     lightingtechnology = Enum.LightingStyle.Soft,
 
@@ -123,11 +133,6 @@ local Changelog = {
         Version = 1000000
     },
     {
-        Title = "V1.0.0",
-        Content = "Released the script in beta",
-        Version = 1
-    },
-    {
         Title = "V1.1.0",
         Content = "Updates & Optimizations",
         Version = 2
@@ -136,21 +141,6 @@ local Changelog = {
         Title = "V1.0.0",
         Content = "Released the script in beta",
         Version = 1
-    },
-    {
-        Title = "V1.1.0",
-        Content = "Updates & Optimizations",
-        Version = 2
-    },
-	{
-        Title = "V1.0.0",
-        Content = "Released the script in beta",
-        Version = 1
-    },
-    {
-        Title = "V1.1.0",
-        Content = "Updates & Optimizations",
-        Version = 2
     },
 }
 
@@ -176,6 +166,8 @@ local Tabs = {
 	["UI Settings"] = Window:AddTab("UI Settings", "app-window"),
 	["Script Settings"] = Window:AddTab("Script Settings", "code"),
 }
+
+SaveManager:BuildConfigSection(Tabs["UI Settings"])
 
 local DraggableLabel = Library:AddDraggableLabel("Eclipse")
 DraggableLabel:SetVisible(true)
@@ -297,6 +289,9 @@ local LightingTechnologyDropdown = LightingSettingsGroupBox:AddDropdown("Lightin
 local LightingTintColorToggle = LightingSettingsGroupBox:AddToggle("Lighting Tint Enabled", {
     Text = "Lighting Tint Enabled",
     Default = false,
+    Callback = function(state)
+        visual_actives.lightingtintenabled = state
+    end,
 })
 local LightingTintColorPicker = LightingTintColorToggle:AddColorPicker("Lighting Tint Color Picker", {
     Default = Color3.new(1,1,1),
@@ -316,6 +311,10 @@ local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
 })
 
 local EspColorLabel = EspToggleTab:AddLabel("ESP Color",true)
+EspColorLabel:AddColorPicker("OW",{
+    Default = Color3.new(1,0.67,0.67),
+    Title = "OW OW OW 67"
+})
 RunService.RenderStepped:Connect(function(dt)
 	FrameCounter += 1
 
@@ -342,7 +341,9 @@ RunService.RenderStepped:Connect(function(dt)
 	PlayersInGameLabel:SetText("Players in Server: "..#Players:GetPlayers())
 
 	if visual_actives.lightingchangeenabled then
-		visual_instances.ColorCorrection.TintColor = visual_actives.ambientcolor
+		if visual_actives.lightingtintenabled then
+            visual_instances.ColorCorrection.TintColor = visual_actives.ambientcolor
+        end
         Lighting.GlobalShadows = visual_actives.shadowsenabled
         Lighting.LightingStyle = visual_actives.lightingtechnology
 	end
