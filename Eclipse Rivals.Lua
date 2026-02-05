@@ -53,6 +53,7 @@ local visual_actives = {
     espfillcolor = Color3.new(1,0,0),
     espbordercolor = Color3.new(1,1,1),
     esptransparency = 0,
+    espteamcolor = false,
 }
 
 local visual_instances = {
@@ -286,13 +287,13 @@ local LightingTechnologyDropdown = LightingSettingsGroupBox:AddDropdown("Lightin
     end,
 })
 
-LightingSettingsGroupBox:AddLabel("Lighting Tint Color",true):AddColorPicker("Lighting Tint Color Picker", {
-    Default = Color3.new(1,1,1),
-    Title = "Choose A Color",
-    Callback = function()
-        visual_actives.ambientcolor = Options["Lighting Tint Color Picker"].Value
-        LightingTintColorLabel:SetText("Tint Color | Current: "..Options["Lighting Tint Color Picker"].Value)
-    end
+LightingSettingsGroupBox:AddLabel("Lighting Tint Color"):AddColorPicker("Lighting Color Picker", {
+	Default = Color3.new(1,1,1),
+	Title = "Choose A Color",
+
+	Callback = function(Value)
+		visual_actives.ambientcolor = Value
+	end,
 })
 
 local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
@@ -303,13 +304,21 @@ local EspToggle = EspToggleTab:AddToggle("Toggle ESP", {
     end,
 })
 
-local EspColorLabel = EspToggleTab:AddToggle("ESP Color", {
-    Text = "Toggle ESP Color Settings",
-    Default = false,
+EspSettingsTab:AddLabel("ESP Color"):AddColorPicker("ESP Color Picker", {
+	Default = Color3.new(1,0,0),
+	Title = "Choose A Color",
+
+	Callback = function(Value)
+		visual_actives.espcolor = Value
+	end,
 })
-EspColorLabel:AddColorPicker("OW",{
-    Default = Color3.new(1,0.67,0.67),
-    Title = "OW OW OW 67"
+
+EspSettingsTab:AddToggle("ESP Team Color", {
+    Text = "ESP Team Color",
+    Default = false,
+    Callback = function(Value)
+        visual_actives.espteamcolor = Value
+    end,
 })
 RunService.RenderStepped:Connect(function(dt)
 	FrameCounter += 1
@@ -357,6 +366,9 @@ RunService.RenderStepped:Connect(function(dt)
                     if visual_actives.advancedespenabled then
                         esp_instance.FillColor = visual_actives.espfillcolor
                         esp_instance.OutlineColor = visual_actives.espbordercolor
+                    elseif visual_actives.espteamcolor then
+                        local teamcolor = Color3.fromRGB(math.floor(plr.TeamColor.Color.R * 255),math.floor(plr.TeamColor.Color.G * 255),math.floor(plr.TeamColor.Color.B * 255))
+                        esp_instance.FillColor = teamcolor
                     end
                 else
                     local esp_instance = Assets:FindFirstChild(plr.Name)
@@ -368,6 +380,9 @@ RunService.RenderStepped:Connect(function(dt)
                     if visual_actives.advancedespenabled then
                         esp_instance.FillColor = visual_actives.espfillcolor
                         esp_instance.OutlineColor = visual_actives.espbordercolor
+                    elseif visual_actives.espteamcolor then
+                        local teamcolor = Color3.fromRGB(math.floor(plr.TeamColor.Color.R * 255),math.floor(plr.TeamColor.Color.G * 255),math.floor(plr.TeamColor.Color.B * 255))
+                        esp_instance.FillColor = teamcolor
                     end
                 end
             end
