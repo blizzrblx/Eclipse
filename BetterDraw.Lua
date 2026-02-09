@@ -82,3 +82,4 @@ while BetterDraw.Active then
         end
     end
 end
+return BetterDraw
