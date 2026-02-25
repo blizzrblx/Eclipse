@@ -65,7 +65,9 @@ local actives = {
 			HighlightTarget = false,
 			Smooth = 4,
 			Prediction = 0,
-			MaxTrackingDistance = 1000
+			MaxTrackingDistance = 1000,
+			FOVEnabled = false,
+			FOV = 2
 		},
 		instances = {
 			Closest = nil
@@ -75,6 +77,14 @@ local actives = {
 
 local Assets = Instance.new("Folder",game:GetService("CoreGui"))
 local AimbotTargetHighlight = Instance.new("Highlight",Assets)
+local AimbotFOVCircle = Drawing.new("Circle")
+AimbotFOVCircle.Visible = false
+AimbotFOVCircle.Color = Color3.fromRGB(255, 0, 0)
+AimbotFOVCircle.Transparency = 1
+AimbotFOVCircle.Thickness = 1
+AimbotFOVCircle.NumSides = 32
+AimbotFOVCircle.Radius = 2
+AimbotFOVCircle.Position = Vector2.new(0.5,0.5)
 
 table.sort(changelog,function(a,b) 
 	return a.id > b.id
@@ -282,18 +292,6 @@ function GetClosestCharacter()
 end
 
 function SetClosest()
-    local current = actives.aimbot.instances.Closest
-
-    if current and current:FindFirstChild("HumanoidRootPart") then
-        local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            local dist = (current.HumanoidRootPart.Position - root.Position).Magnitude
-            if dist <= actives.aimbot.data.MaxTrackingDistance then
-                return
-            end
-        end
-    end
-
     actives.aimbot.instances.Closest = GetClosestCharacter()
 end
 
@@ -697,6 +695,43 @@ AimbotToggleGroupBox:AddDropdown("AimbotMode", {
 	Tooltip = "Pick a mode for the aimbot"
 })
 
+AimbotToggleGroupBox:AddSlider("AimbotSensitivity", {
+	Text = "Aimbot Smoothing",
+	Default = 4,
+	Min = 1,
+	Max = 16,
+	Rounding = 1,
+	Callback = function(value)
+		actives.aimbot.data.Smooth = value
+	end,
+	Tooltip = "Control how smooth aimbot is",
+})
+
+AimbotToggleGroupBox:AddToggle("AimbotFOVEnabled", {
+	Text = "Toggle Aimbot FOV",
+	Default = false,
+	Callback = function(state)
+		actives.aimbot.data.FOVEnabled = state
+	end,
+	Tooltip = "Toggle aimbot fov",
+})
+
+AimbotToggleGroupBox:AddInput("AimbotFOVInput", {
+	Default = "2",
+	Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = true,
+ 
+	Text = "Aimbot FOV",
+	Tooltip = "Enter a number",
+ 
+	Placeholder = "Number between 1-10",
+ 
+	Callback = function(value)
+		actives.aimbot.data.FOV = tonumber(value)
+	end,
+})
+
 local FrameTimer = time()
 local FrameCounter = 0
 local FPS = 60
@@ -744,10 +779,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         FrameCounter = 0
     end
  
-    DraggableLabel:SetText(('Eclipse Rivals | %s fps | %s ms'):format(
-        math.floor(FPS),
-        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
-    ))
+    DraggableLabel:SetText(('Eclipse Rivals | %s fps | %s ms'):format(tostring( math.floor(FPS)),tostring(math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()))))
 
 	HiglightESP()
 	UpdateNameESP()
@@ -772,4 +804,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
 		SetClosest()
 		LookAtTarget(deltaTime)
 	end
+
+	AimbotFOVCircle.Visible = actives.aimbot.data.FOVEnabled
+	AimbotFOVCircle.Raidus = actives.aimbot.data.FOV
 end)
