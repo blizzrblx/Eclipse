@@ -54,14 +54,16 @@ local actives = {
 			nametag = {},
 			line = {},
 			tint = Instance.new("ColorCorrectionEffect",Lighting)
-		}
-	}
+		},
+	},
 	aimbot = {
 		data = {
+			Mode = "Hold",
 			Enabled = false,
-			Active = false
+			Active = false,
+			Keybind = Enum.UserInputType.MouseButton2,
 			HighlightTarget = false,
-			Smooth = 0,
+			Smooth = 4,
 			Prediction = 0,
 			MaxTrackingDistance = 1000
 		},
@@ -280,34 +282,34 @@ function GetClosestCharacter()
 end
 
 function SetClosest()
-    local Closest = GetClosestCharacter()
+    local current = actives.aimbot.instances.Closest
 
-    if Closest then
-        actives.aimbot.instances.Closest = Closest
-
-		if actives.aimbot.HighlightTarget then
-			AimbotTargetHighlight.Adornee = Closest
-		else
-			AimbotTargetHighlight.Adornee = nil
-		end
+    if current and current:FindFirstChild("HumanoidRootPart") then
+        local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            local dist = (current.HumanoidRootPart.Position - root.Position).Magnitude
+            if dist <= actives.aimbot.data.MaxTrackingDistance then
+                return
+            end
+        end
     end
+
+    actives.aimbot.instances.Closest = GetClosestCharacter()
 end
 
-function LookAtTarget()
+function LookAtTarget(deltaTime)
     if not (actives.aimbot.data.Enabled and actives.aimbot.data.Active) then return end
     if not actives.aimbot.instances.Closest then return end
 
-    local targetPart = actives.aimbot.instances.Closest.HumanoidRootPart
+    local targetPart = actives.aimbot.instances.Closest:FindFirstChild("HumanoidRootPart")
+    if not targetPart then return end
 
     local predictionTime = actives.aimbot.data.Prediction
-
     local velocity = targetPart.AssemblyLinearVelocity
-    local predictedPosition =
-        targetPart.Position + (velocity * predictionTime)
 
-    local screenPos, onScreen =
-        Camera:WorldToViewportPoint(predictedPosition)
+    local predictedPosition = targetPart.Position + (velocity * predictionTime)
 
+    local screenPos, onScreen = Camera:WorldToViewportPoint(predictedPosition)
     if not onScreen then return end
 
     local mousePos = UIS:GetMouseLocation()
@@ -317,8 +319,12 @@ function LookAtTarget()
 
     local smooth = math.max(actives.aimbot.data.Smooth, 1)
 
-    deltaX /= smooth
-    deltaY /= smooth
+    deltaX = (deltaX / smooth) * deltaTime * 60
+    deltaY = (deltaY / smooth) * deltaTime * 60
+
+    local maxMove = 50
+    deltaX = math.clamp(deltaX, -maxMove, maxMove)
+    deltaY = math.clamp(deltaY, -maxMove, maxMove)
 
     mousemoverel(deltaX, deltaY)
 end
@@ -658,19 +664,83 @@ LightingEffectsGroupBox:AddSlider("LightingTime", {
 	Tooltip = "Control the Time",
 })
 
+local AimbotToggleGroupBox = Tabs.Aimbot:AddLeftGroupbox("Aimbot", "crosshair")
+local GunModsGroupBox = Tabs.Aimbot:AddLeftGroupbox("Gun Mods", "wrench")
 
+AimbotToggleGroupBox:AddToggle("AimbotEnabled", {
+	Text = "Toggle Aimbot",
+	Default = false,
+	Callback = function(state)
+		actives.aimbot.data.Enabled = state
+	end,
+	Tooltip = "Toggle Aimbot on or off"
+})
 
-local FrameTimer = tick()
+AimbotToggleGroupBox:AddLabel("Aimbot Toggle Key: "):AddKeyPicker("AimbotKeybind", {
+	Text = "Select A Keybind",
+	Default = "MB2",
+	Mode = "Toggle",
+	Callback = function(Key)
+
+	end,
+	Tooltip = "Pick a key for the aimbot"
+})
+
+AimbotToggleGroupBox:AddDropdown("AimbotMode", {
+    Text = "Aimbot Mode",
+    Values = {"Hold", "Toggle"},
+    Default = 1,
+    Multi = false,
+	Callback = function(val)
+		actives.aimbot.data.Mode = val
+	end,
+	Tooltip = "Pick a mode for the aimbot"
+})
+
+local FrameTimer = time()
 local FrameCounter = 0
 local FPS = 60
 
-RunService.RenderStepped:Connect(function()
+local AimToggle = false
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not actives.aimbot.data.Enabled then return end
+
+	local keybind = actives.aimbot.data.Keybind
+	if not keybind then return end
+
+	if input.UserInputType == keybind or input.KeyCode == keybind then
+		if actives.aimbot.data.Mode == "Toggle" then
+			AimToggle = not AimToggle
+			actives.aimbot.data.Active = AimToggle
+		else
+			actives.aimbot.data.Active = true
+		end
+	end
+end)
+
+UIS.InputEnded:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not actives.aimbot.data.Enabled then return end
+
+	local keybind = actives.aimbot.data.Keybind
+	if not keybind then return end
+
+	if actives.aimbot.data.Mode == "Hold" then
+		if input.UserInputType == keybind or input.KeyCode == keybind then
+			actives.aimbot.data.Active = false
+		end
+	end
+end)
+
+RunService.RenderStepped:Connect(function(deltaTime)
 	PlayersInServerLabel:SetText("Players in server: "..tostring(#Players:GetPlayers()),true)
-    FrameCounter += 1
+    FrameCounter = FrameCounter + 1
  
-    if (tick() - FrameTimer) >= 1 then
+    if (time() - FrameTimer) >= 1 then
         FPS = FrameCounter
-        FrameTimer = tick()
+        FrameTimer = time()
         FrameCounter = 0
     end
  
@@ -697,4 +767,9 @@ RunService.RenderStepped:Connect(function()
 		Lighting.ClockTime = actives.visual.data.LightingClockTime
 	end
 	Lighting.GlobalShadows = actives.visual.data.ShadowsEnabled
+
+	if actives.aimbot.data.Enabled and actives.aimbot.data.Active then
+		SetClosest()
+		LookAtTarget(deltaTime)
+	end
 end)
