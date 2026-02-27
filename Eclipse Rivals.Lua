@@ -67,7 +67,7 @@ local actives = {
 			Prediction = 0,
 			MaxTrackingDistance = 1000,
 			FOVEnabled = false,
-			FOV = 2
+			FOV = 100
 		},
 		instances = {
 			Closest = nil
@@ -78,13 +78,16 @@ local actives = {
 local Assets = Instance.new("Folder",game:GetService("CoreGui"))
 local AimbotTargetHighlight = Instance.new("Highlight",Assets)
 local AimbotFOVCircle = Drawing.new("Circle")
-AimbotFOVCircle.Visible = false
+AimbotFOVCircle.Visible = true
 AimbotFOVCircle.Color = Color3.fromRGB(255, 0, 0)
 AimbotFOVCircle.Transparency = 1
 AimbotFOVCircle.Thickness = 1
-AimbotFOVCircle.NumSides = 32
-AimbotFOVCircle.Radius = 2
-AimbotFOVCircle.Position = Vector2.new(0.5,0.5)
+AimbotFOVCircle.NumSides = 512
+AimbotFOVCircle.Radius = 100
+AimbotFOVCircle.Position = Vector2.new(
+	Camera.ViewportSize.X / 2,
+	Camera.ViewportSize.Y / 2
+)
 
 table.sort(changelog,function(a,b) 
 	return a.id > b.id
@@ -266,29 +269,46 @@ function UpdateLineESP()
 end
 
 function GetClosestCharacter()
-    local character = Player.Character
-    local root = character and character:FindFirstChild("HumanoidRootPart")
-    if not root then return nil end
+	local character = Player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then return nil end
 
-    local closest = nil
-    local closestDistance = math.huge
+	local closest = nil
+	local closestDistance = math.huge
 
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= Player then
+	local mousePos = UIS:GetMouseLocation()
+
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= Player then
 			local char = plr.Character
-        	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+			local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-        	if hrp then
-         		local dist = (hrp.Position - root.Position).Magnitude
-            	if dist <= actives.aimbot.data.MaxTrackingDistance and dist < closestDistance then
-            	    closestDistance = dist
-            	    closest = char
-            	end
-        	end
+			if hrp then
+				local worldDist = (hrp.Position - root.Position).Magnitude
+				if worldDist <= actives.aimbot.data.MaxTrackingDistance then
+
+					local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+					if onScreen then
+
+						local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+
+						if actives.aimbot.data.FOVEnabled then
+							if screenDist > actives.aimbot.data.FOV then
+								continue
+							end
+						end
+
+						if screenDist < closestDistance then
+							closestDistance = screenDist
+							closest = char
+						end
+					end
+				end
+			end
 		end
-    end
+	end
 
-    return closest
+	return closest
 end
 
 function SetClosest()
@@ -717,7 +737,7 @@ AimbotToggleGroupBox:AddToggle("AimbotFOVEnabled", {
 })
 
 AimbotToggleGroupBox:AddInput("AimbotFOVInput", {
-	Default = "2",
+	Default = "100",
 	Numeric = true,
 	Finished = true,
 	ClearTextOnFocus = true,
@@ -725,7 +745,7 @@ AimbotToggleGroupBox:AddInput("AimbotFOVInput", {
 	Text = "Aimbot FOV",
 	Tooltip = "Enter a number",
  
-	Placeholder = "Number between 1-10",
+	Placeholder = "Numbers between 1-1000 work best",
  
 	Callback = function(value)
 		actives.aimbot.data.FOV = tonumber(value)
@@ -805,6 +825,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
 		LookAtTarget(deltaTime)
 	end
 
+	AimbotFOVCircle.Position = UIS:GetMouseLocation()
+	AimbotFOVCircle.Radius = actives.aimbot.data.FOV or 100
 	AimbotFOVCircle.Visible = actives.aimbot.data.FOVEnabled
-	AimbotFOVCircle.Raidus = actives.aimbot.data.FOV
 end)
