@@ -72,6 +72,16 @@ local actives = {
 		instances = {
 			Closest = nil
 		}
+	},
+	player = {
+		data = {
+			SpeedBoostEnabled = false,
+			SpeedBoost = 0,
+			InfJumpEnabled = false,
+			JumpBoost = 0,
+			JumpBoostEnabled = false
+			NoClipEnabled = false,
+		}
 	}
 }
 
@@ -347,6 +357,37 @@ function LookAtTarget(deltaTime)
     mousemoverel(deltaX, deltaY)
 end
 
+function SetSpeed(dt)
+    if not actives.player.data.SpeedBoostEnabled then return end
+
+    local char = Player.Character
+    if not char then return end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return end
+
+    local moveDir = hum.MoveDirection
+    if moveDir.Magnitude == 0 then
+        return
+    end
+
+    local targetSpeed = hum.WalkSpeed + actives.player.data.SpeedBoost
+
+    local horizontalVel = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+
+    local desiredVel = moveDir * targetSpeed
+
+    local accel = 8
+    local newVel = horizontalVel:Lerp(desiredVel, math.clamp(accel * dt, 0, 1))
+
+    hrp.Velocity = Vector3.new(
+        newVel.X,
+        hrp.Velocity.Y,
+        newVel.Z
+    )
+end
+
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
@@ -369,6 +410,7 @@ local Tabs = {
 	Visuals = Window:AddTab("Visuals","eye"),
 	Aimbot = Window:AddTab("Aimbot","locate"),
 	Player = Window:AddTab("Player","user"),
+	Ragebot = Window:AddTab("Rage", "skull")
 	["UI Settings"] = Window:AddTab("UI Settings", "app-window"),
 	["Script Settings"] = Window:AddTab("Script Settings", "monitor-cog")
 }
@@ -643,7 +685,7 @@ LightingSettingsGroupBox:AddSlider("LightingSaturation", {
 
 LightingSettingsGroupBox:AddToggle("LightingTintToggle", {
     Text = "Toggle Lighting Tints",
-    Default = true,
+    Default = false,
 	Callback = function(state)
 		actives.visual.data.LightingTintEnabled = state
 	end,
@@ -752,6 +794,79 @@ AimbotToggleGroupBox:AddInput("AimbotFOVInput", {
 	end,
 })
 
+--// Player UI
+
+local SpeedBoostGroupBox = Tabs.Player:AddLeftGroupbox("Speed Boost", "gauge")
+local CharacterEffectsGroupBox = Tabs.Player:AddRightGroupbox("Character Effects", "user-pen")
+
+SpeedBoostGroupBox:AddToggle("SpeedBoostEnabled", {
+	Text = "Toggle Speed Boost",
+	Default = false,
+	Callback = function(state)
+		actives.player.data.SpeedBoostEnabled = state
+	end,
+	Tooltip = "Toggle Speed Boost (Undetected)"
+})
+
+SpeedBoostGroupBox:AddInput("SpeedBoostInput", {
+	Default = "100",
+	Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = true,
+ 
+	Text = "Speed Boost Amount",
+	Tooltip = "Enter a number",
+ 
+	Placeholder = "Numbers between 50-300 work best",
+ 
+	Callback = function(value)
+		actives.player.data.SpeedBoost = tonumber(value)
+	end,
+})
+
+CharacterEffectsGroupBox:AddToggle("NoClipEnabled", {
+	Text = "Toggle NoClip",
+	Default = false,
+	Callback = function(state)
+		actives.player.data.NoClipEnabled = not state
+	end,
+	Tooltip = "Allows you to walk through walls"
+})
+
+CharacterEffectsGroupBox:AddToggle("InfJumpEnabled", {
+	Text = "Toggle Infinite Jump",
+	Default = false,
+	Callback = function(state)
+		actives.player.data.InfJumpEnabled = state
+	end,
+	Tooltip = "Allows you to jump midair"
+})
+
+CharacterEffectsGroupBox:AddToggle("JumpBoostEnabled", {
+	Text = "Toggle Jump Boost",
+	Default = false,
+	Callback = function(state)
+		actives.player.data.JumpBoostEnabled = state
+	end,
+	Tooltip = "Jump higher and longer"
+})
+
+CharacterEffectsGroupBox:AddInput("JumpBoostInput", {
+	Default = "0",
+	Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = true,
+
+	Text = "Jump Boost Amount",
+	Tooltip = "Enter a number",
+ 
+	Placeholder = "Numbers between 50-300 work best",
+
+	Callback = function(value)
+		actives.player.data.JumpBoost = tonumber(value)
+	end,
+})
+
 local FrameTimer = time()
 local FrameCounter = 0
 local FPS = 60
@@ -785,6 +900,30 @@ UIS.InputEnded:Connect(function(input, gameProcessed)
 	if actives.aimbot.data.Mode == "Hold" then
 		if input.UserInputType == keybind or input.KeyCode == keybind then
 			actives.aimbot.data.Active = false
+		end
+	end
+end)
+
+UIS.JumpRequest:Connect(function()
+	if actives.player.data.InfJumpEnabled then
+		if Player.Character and Player.Character.Humanoid then
+			Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end
+
+	if actives.player.data.JumpBoostEnabled then
+		if Player.Character and Player.Character.Humanoid then
+			local state = Player.Character.Humanoid.FloorMaterial
+
+			if state == Enum.Material.Air then
+				if actives.player.data.InfJumpEnabled then
+					local Vector = Vector3.new(0,actives.player.data.JumpBoost,0)
+					Player.Character.HumanoidRootPart.Velocity = Player.Character.HumanoidRootPart.Velocity + Vector
+				end
+			else
+				local Vector = Vector3.new(0,actives.player.data.JumpBoost,0)
+				Player.Character.HumanoidRootPart.Velocity = Player.Character.HumanoidRootPart.Velocity + Vector
+			end
 		end
 	end
 end)
@@ -828,4 +967,10 @@ RunService.RenderStepped:Connect(function(deltaTime)
 	AimbotFOVCircle.Position = UIS:GetMouseLocation()
 	AimbotFOVCircle.Radius = actives.aimbot.data.FOV or 100
 	AimbotFOVCircle.Visible = actives.aimbot.data.FOVEnabled
+	SetSpeed(deltaTime)
+	if Player.Character then
+		for i,limb in pairs(Player.Character:GetChildren()) do
+			if limb:IsA("BasePart") then limb.CanCollide = actives.player.data.NoClipEnabled end
+		end
+	end
 end)
