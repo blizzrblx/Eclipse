@@ -73,13 +73,27 @@ local actives = {
 			Closest = nil
 		}
 	},
+	silentaim = {
+		data = {
+			Enabled = false,
+			AutoClick = false,
+			ClickInterval = 0.10,
+			CheckLobby = true,
+		},
+		instances = {
+			target = nil,
+			autoClickConnection = nil,
+			isLeftMouseDown = false,
+			isRightMouseDown = false,
+		}
+	},
 	player = {
 		data = {
 			SpeedBoostEnabled = false,
 			SpeedBoost = 0,
 			InfJumpEnabled = false,
 			JumpBoost = 0,
-			JumpBoostEnabled = false
+			JumpBoostEnabled = false,
 			NoClipEnabled = false,
 		}
 	}
@@ -161,11 +175,12 @@ function HiglightESP()
 				Highlight.Adornee = plr.Character
 				Highlight.FillColor = actives.visual.data.HighlightESPColor
 				Highlight.OutlineColor = actives.visual.data.HighlightESPColor
-
 			end
 		end
 	else
-		for i,v in pairs(Assets:GetChildren()) do v:Destroy() end
+		for i,v in pairs(Assets:GetChildren()) do
+			v:Destroy()
+		end
 	end
 end
 
@@ -321,6 +336,120 @@ function GetClosestCharacter()
 	return closest
 end
 
+-- =============================================
+-- NEW SILENT AIM: Camera-lock to closest head
+-- =============================================
+
+local function isLobbyVisible()
+	local ok, result = pcall(function()
+		return Player.PlayerGui.MainGui.MainFrame.Lobby.Currency.Visible == true
+	end)
+	return ok and result
+end
+
+local function getClosestPlayerToMouse()
+	local closestPlayer = nil
+	local shortestDistance = math.huge
+	local mousePosition = UIS:GetMouseLocation()
+
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= Player and plr.Character and plr.Character:FindFirstChild("Head") then
+			local head = plr.Character.Head
+			local headPosition, onScreen = Camera:WorldToViewportPoint(head.Position)
+
+			if onScreen then
+				local screenPosition = Vector2.new(headPosition.X, headPosition.Y)
+				local distance = (screenPosition - mousePosition).Magnitude
+
+				if distance < shortestDistance then
+					closestPlayer = plr
+					shortestDistance = distance
+				end
+			end
+		end
+	end
+
+	return closestPlayer
+end
+
+local function lockCameraToHead()
+	local sa = actives.silentaim
+	local target = sa.instances.target
+	if target and target.Character and target.Character:FindFirstChild("Head") then
+		local head = target.Character.Head
+		local headPos, _ = Camera:WorldToViewportPoint(head.Position)
+		if headPos.Z > 0 then
+			local camPos = Camera.CFrame.Position
+			Camera.CFrame = CFrame.new(camPos, head.Position)
+		end
+	end
+end
+
+local function startAutoClick()
+	local sa = actives.silentaim
+	if sa.instances.autoClickConnection then
+		sa.instances.autoClickConnection:Disconnect()
+	end
+	sa.instances.autoClickConnection = RunService.Heartbeat:Connect(function()
+		if sa.instances.isLeftMouseDown or sa.instances.isRightMouseDown then
+			local lobbyCheck = actives.silentaim.data.CheckLobby
+			if not lobbyCheck or not isLobbyVisible() then
+				mouse1click()
+			end
+		else
+			sa.instances.autoClickConnection:Disconnect()
+			sa.instances.autoClickConnection = nil
+		end
+	end)
+end
+
+-- Auto-click input listeners
+UIS.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not actives.silentaim.data.AutoClick then return end
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if not actives.silentaim.instances.isLeftMouseDown then
+			actives.silentaim.instances.isLeftMouseDown = true
+			startAutoClick()
+		end
+	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+		if not actives.silentaim.instances.isRightMouseDown then
+			actives.silentaim.instances.isRightMouseDown = true
+			startAutoClick()
+		end
+	end
+end)
+
+UIS.InputEnded:Connect(function(input, gameProcessed)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		actives.silentaim.instances.isLeftMouseDown = false
+	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+		actives.silentaim.instances.isRightMouseDown = false
+	end
+end)
+
+-- Main silent aim heartbeat
+RunService.Heartbeat:Connect(function()
+	if not actives.silentaim.data.Enabled then
+		actives.silentaim.instances.target = nil
+		return
+	end
+
+	local lobbyCheck = actives.silentaim.data.CheckLobby
+	if lobbyCheck and isLobbyVisible() then
+		actives.silentaim.instances.target = nil
+		return
+	end
+
+	actives.silentaim.instances.target = getClosestPlayerToMouse()
+	if actives.silentaim.instances.target then
+		lockCameraToHead()
+	end
+end)
+
+-- =============================================
+
 function SetClosest()
     actives.aimbot.instances.Closest = GetClosestCharacter()
 end
@@ -410,7 +539,7 @@ local Tabs = {
 	Visuals = Window:AddTab("Visuals","eye"),
 	Aimbot = Window:AddTab("Aimbot","locate"),
 	Player = Window:AddTab("Player","user"),
-	Ragebot = Window:AddTab("Rage", "skull")
+	Ragebot = Window:AddTab("Rage", "skull"),
 	["UI Settings"] = Window:AddTab("UI Settings", "app-window"),
 	["Script Settings"] = Window:AddTab("Script Settings", "monitor-cog")
 }
@@ -724,7 +853,10 @@ LightingEffectsGroupBox:AddSlider("LightingTime", {
 	Tooltip = "Control the Time",
 })
 
+--// Aimbot UI
+
 local AimbotToggleGroupBox = Tabs.Aimbot:AddLeftGroupbox("Aimbot", "crosshair")
+local SilentAimGroupBox = Tabs.Aimbot:AddRightGroupbox("Silent Aim", "ghost")
 local GunModsGroupBox = Tabs.Aimbot:AddLeftGroupbox("Gun Mods", "wrench")
 
 AimbotToggleGroupBox:AddToggle("AimbotEnabled", {
@@ -793,6 +925,74 @@ AimbotToggleGroupBox:AddInput("AimbotFOVInput", {
 		actives.aimbot.data.FOV = tonumber(value)
 	end,
 })
+
+-- Silent Aim state
+local silentAimFakeActive = false
+
+SilentAimGroupBox:AddToggle("SilentAimEnabled", {
+	Text = "Toggle Silent Aim",
+	Default = false,
+	Callback = function(state)
+		actives.silentaim.data.Enabled = state
+	end,
+	Tooltip = "Hit people without your mouse hitting them"
+})
+
+local SilentAimKeybindToggle = SilentAimGroupBox:AddToggle("SilentAimFakeEnabled", {
+	Text = "Toggle Fake Silent Aim",
+	Default = false,
+	Callback = function(state)
+		silentAimFakeActive = state
+	end,
+	Tooltip = "Snap to target, shoot, and snap back"
+})
+
+local SilentAimKeybind = SilentAimKeybindToggle:AddKeyPicker("SilentAimKeybind", {
+	Text = "Fake Silent Aim Key",
+	Default = "Q",
+	Mode = "Toggle",
+	Callback = function() end,
+	Tooltip = "Key to activate fake silent aim snap"
+})
+
+local fakeAimCooldown = false
+
+RunService.Heartbeat:Connect(function()
+	if not silentAimFakeActive then return end
+	if not Toggles["SilentAimFakeEnabled"].Value then return end
+	if not SilentAimKeybind:GetKeybindActive() then return end
+	if fakeAimCooldown then return end
+
+	local target = getClosestPlayerToMouse()
+	if not target or not target.Character then return end
+
+	local head = target.Character:FindFirstChild("Head")
+	if not head then return end
+
+	local headScreenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+	if not onScreen then return end
+
+	local mousePos = UIS:GetMouseLocation()
+	local targetPos = Vector2.new(headScreenPos.X, headScreenPos.Y)
+
+	local deltaX = targetPos.X - mousePos.X
+	local deltaY = targetPos.Y - mousePos.Y
+
+	fakeAimCooldown = true
+
+	mousemoverel(deltaX, deltaY)
+
+	task.wait(0.05)
+
+	mouse1click()
+
+	task.wait(0.05)
+
+	mousemoverel(-deltaX, -deltaY)
+
+	task.wait(0.1)
+	fakeAimCooldown = false
+end)
 
 --// Player UI
 
@@ -938,7 +1138,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         FrameCounter = 0
     end
  
-    DraggableLabel:SetText(('Eclipse Rivals | %s fps | %s ms'):format(tostring( math.floor(FPS)),tostring(math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()))))
+    DraggableLabel:SetText(('Eclipse Rivals | %s fps | %s ms'):format(tostring(math.floor(FPS)),tostring(math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()))))
 
 	HiglightESP()
 	UpdateNameESP()
