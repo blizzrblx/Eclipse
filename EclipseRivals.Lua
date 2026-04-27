@@ -463,6 +463,32 @@ local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
 
+local Loading = Library:CreateLoading({
+    Title = "Eclipse | RIVALS",
+    Icon = 109423853999456,
+    TotalSteps = 4
+})
+Loading:SetMessage("Initializing...")
+Loading:SetDescription("Loading Components")
+task.wait(1)
+ 
+Loading:SetCurrentStep(1)
+Loading:SetDescription("Loading configuration & UI...")
+task.wait(1)
+ 
+Loading:SetCurrentStep(2)
+Loading:ShowSidebarPage(true)
+Loading.Sidebar:AddLabel("User: " .. game.Players.LocalPlayer.Name)
+Loading.Sidebar:AddLabel("Version: "..version)
+task.wait(1)
+ 
+Loading:SetCurrentStep(3)
+Loading:SetDescription("Ready to start!")
+task.wait(1)
+ 
+Loading:SetCurrentStep(4)
+Loading:Continue()
+
 Library.ForceCheckbox = true
 local Options = Library.Options
 local Toggles = Library.Toggles
@@ -887,7 +913,9 @@ RagebotGroupBox:AddToggle("RagebotEnabled", {
 	Text = "Toggle Ragebot",
 	Default = false,
 	Callback = function(state)
-		actives.rage.data.Enabled = state
+		if state == true then
+			actives.rage.data.Enabled = state
+		end
 	end,
 	Tooltip = "Toggle Ragebot"
 })
@@ -1040,6 +1068,8 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
 		else
 			actives.aimbot.data.Active = true
 		end
+	elseif input.KeyCode == Library.ToggleKeybind and then
+		actives.rage.data.Enabled = false
 	end
 end)
 
