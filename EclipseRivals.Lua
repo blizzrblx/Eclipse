@@ -7,6 +7,8 @@ local UIS = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
+local Mouse = Player:GetMouse()
+
 local version = "V1.0.0"
 local changelog = {
 	{
@@ -80,6 +82,7 @@ local actives = {
 			JumpBoost = 0,
 			JumpBoostEnabled = false,
 			NoClipEnabled = false,
+			ClickTPEnabled = false
 		}
 	},
 	rage = {
@@ -434,6 +437,8 @@ local tpdel = actives.rage.data.TeleportDelay
 local shootdel = actives.rage.data.ShootDelay
 
 function ragetp()
+	if not actives.rage.data.Enabled then return end
+
 	local now = tick()
 
 	if now - last <= tpdel then return end
@@ -445,11 +450,9 @@ function ragetp()
 
 	last = now
 
-	local targetcf = CFrame.new(Closest:GetPivot() * CFrame.new(0,0,-2))
-
 	local Character = Player.Character
 
-	Character:PivotTo(targetcf)
+	Character:PivotTo(Closest:GetPivot() - CFrame.new(0,0,2))
 
 	mouse1click()
 end
@@ -478,7 +481,6 @@ local Tabs = {
 	Player = Window:AddTab("Player","user"),
 	Ragebot = Window:AddTab("Rage", "skull"),
 	["UI Settings"] = Window:AddTab("UI Settings", "app-window"),
-	["Script Settings"] = Window:AddTab("Script Settings", "monitor-cog")
 }
 
 Library:Notify({
@@ -486,6 +488,9 @@ Library:Notify({
 	Description = "Thanks for using Eclipse!",
 	Time = 4,
 })
+
+Library.ShowToggleFrameInKeybinds = true
+
 ThemeManager:SetLibrary(Library)
 ThemeManager:SetDefaultTheme(basetheme)
 ThemeManager:SetFolder("Eclipse") 
@@ -508,6 +513,14 @@ local HomeRightGroupBox = Tabs.Home:AddRightGroupbox("Script Info","monitor")
 
 local ErrorLogsGroupBox = Tabs.Home:AddLeftGroupbox("Error Logs", "ban")
 local ChangelogGroupBox = Tabs.Home:AddRightGroupbox("Changelogs", "list")
+
+HomeRightGroupBox:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", {
+    Default = "RightControl",
+    NoUI = true,
+    Text = "Menu keybind"
+})
+ 
+Library.ToggleKeybind = Options.MenuKeybind 
 
 if currentdata.script_executions == 0 then
 	HomeLeftGroupBox:AddLabel('Welcome To Eclipse, <font color="rgb(0,205,0)">['..Player.DisplayName.."]</font>",true)
@@ -680,14 +693,22 @@ ESPSettingsGroupBox:AddToggle("ESPEnabled", {
 	Callback = function(state)
 		actives.visual.data.ESPEnabled = state
 		if state == false then
-			esptog1:SetValue(state)
-			esptog2:SetValue(state)
-			esptog3:SetValue(state)
+			esptog1:SetDisabled(state)
+			esptog2:SetDisabled(state)
+			esptog3:SetDisabled(state)
 		end
 	end,
 	Tooltip = "Toggles all ESP on or off",
 })
 
+ESPSettingsGroupBox:AddLabel("Toggle ESP Keybind"):AddKeyPicker("ToggleESPKeybind", {
+    Text = "Pick a key",
+    Default = "F",
+    Mode = "Toggle",
+	Callback = function(state)
+		actives.visual.data.ESPEnabled = state
+	end,
+})
 
 ESPSettingsGroupBox:AddLabel("ESP Color"):AddColorPicker("ESPColor", {
 	Default = Color3.fromRGB(255,0,0),
@@ -903,6 +924,8 @@ RagebotGroupBox:AddInput("RagebotShootDelay", {
 
 local SpeedBoostGroupBox = Tabs.Player:AddLeftGroupbox("Speed Boost", "gauge")
 local CharacterEffectsGroupBox = Tabs.Player:AddRightGroupbox("Character Effects", "user-pen")
+local WorldGroupBox = Tabs.Player:AddLeftGroupbox("World", "globe")
+local MovementGroupBox = Tabs.Player:AddRightGroupbox("Movement", "arrow")
 
 SpeedBoostGroupBox:AddToggle("SpeedBoostEnabled", {
 	Text = "Toggle Speed Boost",
@@ -972,6 +995,31 @@ CharacterEffectsGroupBox:AddInput("JumpBoostInput", {
 	end,
 })
 
+WorldGroupBox:AddInput("GravityInput", {
+	Default = "196.2",
+	Numeric = true,
+	Finished = true,
+	ClearTextOnFocus = true,
+
+	Text = "World Gravity",
+	Tooltip = "Enter a number",
+
+	Placeholder = "Numbers between 75-200 work best",
+
+	Callback = function(value)
+		workspace.Gravity = tonumber(value)
+	end,
+})
+
+MovementGroupBox:AddToggle("ClickTPToggle", {
+	Text = "Toggle Teleport on Click",
+	Default = false,
+	Callback = function(state)
+		actives.player.data.ClickTPEnabled = state
+	end,
+	Tooltip = "Allows you to teleport to where your mouse is, when you click"
+})
+
 local FrameTimer = time()
 local FrameCounter = 0
 local FPS = 60
@@ -1030,6 +1078,12 @@ UIS.JumpRequest:Connect(function()
 				Player.Character.HumanoidRootPart.Velocity = Player.Character.HumanoidRootPart.Velocity + Vector
 			end
 		end
+	end
+end)
+
+Mouse.Button1Down:Connect(function()
+	if Player.Character and actives.player.data.ClickTPEnabled then
+		Player.Character:PivotTo(Mouse.Hit + Vector3.new(0,3,0))
 	end
 end)
 
