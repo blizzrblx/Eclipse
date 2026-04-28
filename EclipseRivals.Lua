@@ -1,3 +1,10 @@
+local ____ = "https://luarmor.net/"
+for _ = 1, 12345 do
+    ____ = ____ .. "0"
+end
+
+math.randomseed(os.time())
+
 local Players = game:GetService("Players")
 local Http = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
@@ -452,7 +459,7 @@ function ragetp()
 
 	local Character = Player.Character
 
-	Character:PivotTo(Closest:GetPivot() - CFrame.new(0,0,2))
+	Character:PivotTo(Closest:GetPivot() * CFrame.new(0,0,-2))
 
 	mouse1click()
 end
@@ -462,6 +469,32 @@ local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+
+local Loading = Library:CreateLoading({
+    Title = "Eclipse | RIVALS",
+    Icon = 109423853999456,
+    TotalSteps = 4
+})
+Loading:SetMessage("Initializing...")
+Loading:SetDescription("Loading Components")
+task.wait(1)
+ 
+Loading:SetCurrentStep(1)
+Loading:SetDescription("Loading configuration & UI...")
+task.wait(1)
+ 
+Loading:SetCurrentStep(2)
+Loading:ShowSidebarPage(true)
+Loading.Sidebar:AddLabel("User: " .. Player.Name)
+Loading.Sidebar:AddLabel("Version: "..version)
+task.wait(1)
+ 
+Loading:SetCurrentStep(3)
+Loading:SetDescription("Ready to start!")
+task.wait(1)
+ 
+Loading:SetCurrentStep(4)
+Loading:Continue()
 
 Library.ForceCheckbox = true
 local Options = Library.Options
@@ -887,7 +920,9 @@ RagebotGroupBox:AddToggle("RagebotEnabled", {
 	Text = "Toggle Ragebot",
 	Default = false,
 	Callback = function(state)
-		actives.rage.data.Enabled = state
+		if state == true then
+			actives.rage.data.Enabled = state
+		end
 	end,
 	Tooltip = "Toggle Ragebot"
 })
@@ -1040,6 +1075,8 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
 		else
 			actives.aimbot.data.Active = true
 		end
+	elseif input.KeyCode == Library.ToggleKeybind then
+		actives.rage.data.Enabled = false
 	end
 end)
 
